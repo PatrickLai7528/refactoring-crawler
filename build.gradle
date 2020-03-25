@@ -28,6 +28,8 @@ dependencies {
 
     compile group: 'org.jgrapht', name: 'jgrapht-io', version: '1.4.0'
 
+    compile group: 'com.github.javaparser', name: 'javaparser-symbol-solver-core', version: '3.15.14'
+
     compileOnly 'org.projectlombok:lombok:1.18.12'
     annotationProcessor 'org.projectlombok:lombok:1.18.12'
 
