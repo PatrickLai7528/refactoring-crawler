@@ -134,8 +134,6 @@ public class ShinglesUtil {
 			oldVersionPackageList, oldVersionFieldList);
 
 		initializeElementsLists(newVersionGraph, newVersionMethodList, newVersionClassList, newVersionPackageList, newVersionFieldList);
-
-		System.out.println("fuck you");
 	}
 
 	private void initializeElementsLists(DirectedMultigraph<Node, Edge> graph, List<Node> methods,

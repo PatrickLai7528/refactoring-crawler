@@ -2,10 +2,16 @@ package refactoring.crawler;
 
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.symbolsolver.JavaSymbolSolver;
+import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
+import com.github.javaparser.symbolsolver.resolution.typesolvers.MemoryTypeSolver;
+import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
 import lombok.val;
 import org.jgrapht.nio.dot.DOTExporter;
 import refactoring.crawler.detection.RefactoringDetection;
 import refactoring.crawler.detection.RenameMethodDetection;
+import refactoring.crawler.detection.SearchHelper;
 import refactoring.crawler.project.IProject;
 import refactoring.crawler.util.*;
 
@@ -22,83 +28,24 @@ public class RefactoringCrawler {
 
 	public static void main(String[] args) throws IOException {
 		val crawler = new RefactoringCrawler("project name");
-		val oldSource = "package com.MyCourses.dao.impl;/*\n" +
-			" * @PackageName com.MyCourses.dao.impl\n" +
-			" * @ClassName ForumDAO\n" +
-			" * @Author Lai Kin Meng\n" +
-			" * @Date 2019-02-25\n" +
-			" * @ProjectName MyCoursesServer\n" +
-			" */\n" +
-			"\n" +
-			"import com.MyCourses.dao.IForumDAO;\n" +
-			"import com.MyCourses.entity.ForumEntity;\n" +
-			"import org.springframework.stereotype.Repository;\n" +
-			"import org.springframework.transaction.annotation.Transactional;\n" +
-			"\n" +
-			"import javax.persistence.EntityManager;\n" +
-			"import javax.persistence.PersistenceContext;\n" +
-			"\n" +
-			"@Repository\n" +
-			"@Transactional\n" +
-			"public class ForumDAO implements IForumDAO {\n" +
-			"\n" +
-			"    @PersistenceContext\n" +
-			"    private EntityManager entityManager;\n" +
-			"\n" +
-			"\n" +
-			"    @Override\n" +
-			"    public ForumEntity retrieveByFid(Long fid) {\n" +
-			"        return entityManager.find(ForumEntity.class, fid);\n" +
-			"    }\n" +
-			"\n" +
-			"    @Override\n" +
-			"    public void update(ForumEntity forumEntity) {\n" +
-			"        ForumEntity f = retrieveByFid(forumEntity.getFid());\n" +
-			"        f.setTopic(forumEntity.getTopic());\n" +
-			"        f.setQuestionerStudent(forumEntity.getQuestionerStudent());\n" +
-			"        f.setQuestionerTeacher(forumEntity.getQuestionerTeacher());\n" +
-			"        f.setCommentEntityList(forumEntity.getCommentEntityList());\n" +
-			"        entityManager.flush();\n" +
-			"    }\n" +
+		val oldSource = "package com.MyCourses.dao.impl;" +
+			"public class A{" +
+			"   public void foo(){" +
+			"       System.out.println(1);" +
+			"   }" +
+			"   " +
+			"   public void bar(){" +
+			"       this.foo();" +
+			"   }" +
 			"}";
-		val newSource = "package com.MyCourses.dao.impl;/*\n" +
-			" * @PackageName com.MyCourses.dao.impl\n" +
-			" * @ClassName ForumDAO\n" +
-			" * @Author Lai Kin Meng\n" +
-			" * @Date 2019-02-25\n" +
-			" * @ProjectName MyCoursesServer\n" +
-			" */\n" +
-			"\n" +
-			"import com.MyCourses.dao.IForumDAO;\n" +
-			"import com.MyCourses.entity.ForumEntity;\n" +
-			"import org.springframework.stereotype.Repository;\n" +
-			"import org.springframework.transaction.annotation.Transactional;\n" +
-			"\n" +
-			"import javax.persistence.EntityManager;\n" +
-			"import javax.persistence.PersistenceContext;\n" +
-			"\n" +
-			"@Repository\n" +
-			"@Transactional\n" +
-			"public class ForumDAO implements IForumDAO {\n" +
-			"\n" +
-			"    @PersistenceContext\n" +
-			"    private EntityManager entityManager;\n" +
-			"\n" +
-			"\n" +
-			"    @Override\n" +
-			"    public ForumEntity retrieveByFid(Long fid) {\n" +
-			"        return entityManager.find(ForumEntity.class, fid);\n" +
-			"    }\n" +
-			"\n" +
-			"    @Override\n" +
-			"    public void updateAgain(ForumEntity forumEntity) {\n" +
-			"        ForumEntity f = retrieveByFid(forumEntity.getFid());\n" +
-			"        f.setTopic(forumEntity.getTopic());\n" +
-			"        f.setQuestionerStudent(forumEntity.getQuestionerStudent());\n" +
-			"        f.setQuestionerTeacher(forumEntity.getQuestionerTeacher());\n" +
-			"        f.setCommentEntityList(forumEntity.getCommentEntityList());\n" +
-			"        entityManager.flush();\n" +
-			"    }\n" +
+		val newSource = "package com.MyCourses.dao.impl;" +
+			"public class A{" +
+			"   public void fooA(){" +
+			"       System.out.println(1);" +
+			"   }" +
+			"   public void bar(){" +
+			"       this.fooA();" +
+			"   }" +
 			"}";
 
 		val oldList = new ArrayList<String>();
@@ -116,9 +63,14 @@ public class RefactoringCrawler {
 	}
 
 	private List<CompilationUnit> parse(List<String> files) {
+		TypeSolver typeSolver = new ReflectionTypeSolver();
+		JavaSymbolSolver symbolSolver = new JavaSymbolSolver(typeSolver);
+		StaticJavaParser.getConfiguration().setSymbolResolver(symbolSolver);
+
 		List<CompilationUnit> resList = new LinkedList<>();
 		for (String source : files) {
-			resList.add(StaticJavaParser.parse(source));
+			CompilationUnit cu = StaticJavaParser.parse(source);
+			resList.add(cu);
 		}
 		return resList;
 	}
@@ -150,14 +102,18 @@ public class RefactoringCrawler {
 			System.out.println(versionGraph.getEdgeSource(e) + " --> " + versionGraph.getEdgeTarget(e));
 		}
 
+		System.out.println(originalGraph.getNamedVertexMap());
+
 		detectRenameMethod(1, shinglesUtil, originalGraph, versionGraph);
+		val res = SearchHelper.findMethodCallers(originalGraph, (MethodNode) originalGraph.findNamedNode("com.MyCourses.dao.impl.A.foo"), false);
+		System.out.println(res);
 	}
 
 	private void detectRenameMethod(double tMethod, ShinglesUtil se, NamedDirectedMultigraph oldVersionGraph,
 	                                NamedDirectedMultigraph newVersionGraph) {
 		List<Node[]> candidateMethods = se.findSimilarMethods();
 		RefactoringDetection detector = new RenameMethodDetection(oldVersionGraph, newVersionGraph);
-		detector.setThreshold(tMethod);
+//		detector.setThreshold(tMethod);
 
 		List<Node[]> renamedMethods = detector.detectRefactorings(candidateMethods);
 		if (renamedMethods.size() > 0) {

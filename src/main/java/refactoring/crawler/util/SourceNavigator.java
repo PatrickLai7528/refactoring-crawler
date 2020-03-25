@@ -1,5 +1,6 @@
 package refactoring.crawler.util;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -10,10 +11,14 @@ import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
+import com.github.javaparser.resolution.declarations.ResolvedMethodDeclaration;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.val;
 import org.eclipse.jdt.core.Signature;
+import refactoring.crawler.detection.SearchHelper;
 import refactoring.crawler.project.*;
 
 import javax.annotation.Nonnull;
@@ -68,6 +73,7 @@ public class SourceNavigator {
 							classNode.setProjectName(projectName);
 							classNode.setDeprecated(classOrInterfaceDeclaration.getAnnotationByClass(Deprecated.class).isPresent());
 							classNode.setInterface(classOrInterfaceDeclaration.isInterface());
+
 							this.allClassCounter += 1;
 							if (classOrInterfaceDeclaration.isProtected() || classOrInterfaceDeclaration.isPublic()) {
 								classNode.setAPI(true);
@@ -105,7 +111,16 @@ public class SourceNavigator {
 									int[] shingles = shinglesUtil.computeMethodShingles(statementBody);
 									String qualifiedName = classNode.getFullyQualifiedName() + "."
 										+ method.getNameAsString();
-									Node methodNode = new Node(qualifiedName, Node.Type.METHOD);
+									MethodNode methodNode = new MethodNode(qualifiedName);
+
+									List<MethodNode.CalledMethod> calledMethodList = method
+										.findAll(MethodCallExpr.class)
+										.stream()
+										.map(MethodCallExpr::resolve)
+										.map(resolved -> new MethodNode.CalledMethod(resolved.getQualifiedName(), resolved.getQualifiedSignature()))
+										.collect(Collectors.toList());
+
+									methodNode.setCalledInside(calledMethodList);
 
 									allMethodsCounter += 1;
 									if (method.isPublic() || method.isProtected()) {

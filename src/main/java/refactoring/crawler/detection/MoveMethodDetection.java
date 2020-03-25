@@ -8,9 +8,8 @@ import java.util.List;
 import java.util.Set;
 
 public class MoveMethodDetection extends RefactoringDetection {
-    @Override
-    public List<Node[]> pruneOriginalCandidates(List<Node[]> candidates) {
-        return null;
+    public MoveMethodDetection(NamedDirectedMultigraph graph, NamedDirectedMultigraph graph2) {
+        super(graph, graph2);
     }
 
     @Override
@@ -19,12 +18,22 @@ public class MoveMethodDetection extends RefactoringDetection {
     }
 
     @Override
-    public List<Edge> filterNamedEdges(Set<Edge> list) {
+    public List<Edge> filterNamedEdges(List<Edge> list) {
         return null;
     }
 
     @Override
-    protected void createCallGraph(Node originalInV2, NamedDirectedMultigraph graph2) {
+    public List<Node[]> pruneOriginalCandidates(List<Node[]> candidates) {
+        return null;
+    }
 
+    @Override
+    public void createCallGraph(Node originalInV2, NamedDirectedMultigraph graph2) {
+
+    }
+
+    @Override
+    public boolean isRename() {
+        return false;
     }
 }

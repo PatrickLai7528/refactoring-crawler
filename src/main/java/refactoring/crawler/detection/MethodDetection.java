@@ -15,57 +15,82 @@ import java.util.Set;
 
 public abstract class MethodDetection extends RefactoringDetection {
 
-    protected void createCallGraph(Node node, NamedDirectedMultigraph graph) {
-        List callers = new ArrayList();
-        if (this instanceof ChangeMethodSignatureDetection)
-            callers = SearchHelper.findMethodCallers(node, true);
-        else
-            callers = SearchHelper.findMethodCallers(node, false);
-        for (Object o : callers) {
-//            IMethod element = (IMethod) o;
-//            String nodeName = element.getElementName();
-//            String qualifiername = element.getDeclaringType()
-//                    .getFullyQualifiedName('.');
-//            Node caller = graph.findNamedNode(qualifiername + "." + nodeName);
-//            if (caller != null) {
-//                Edge edge = factory.createEdge(caller, node, Node.METHOD_CALL);
-//                graph.addEdge(edge);
-//            }
-        }
-        node.setCreatedCallGraph();
+	public MethodDetection(NamedDirectedMultigraph graph, NamedDirectedMultigraph graph2) {
+		super(graph, graph2);
+	}
 
-    }
+	@Override
+	public double computeLikeliness(Node node1, Node node12) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 
-    public List<Edge> filterNamedEdges(Set<Edge> list) {
-        val results = new ArrayList<Edge>();
-        for (final Edge edge : list) {
-            if (Node.Type.METHOD_CALL.equals(edge.getLabel())) {
-                results.add(edge);
-            }
-        }
-        return results;
-    }
+	@Override
+	public List pruneOriginalCandidates(List candidates) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
-    protected void createCallGraph(Node original, Node version) {
-        if (!original.hasCallGraph()) {
-            createCallGraph(original, graph1);
-            original.setCreatedCallGraph();
-        }
-        if (!version.hasCallGraph()) {
-            createCallGraph(version, graph2);
-            version.setCreatedCallGraph();
-        }
-    }
+	@Override
+	public boolean isRename() {
+		// TODO Auto-generated method stub
+		return false;
+	}
 
-    public double analyzeIncomingEdges(Node original, Node version) {
-        double incomingEdgesGrade;
-        createCallGraph(original, version);
-        val incomingEdgesOriginal = filterNamedEdges(graph1
-                .incomingEdgesOf(original));
-        val incomingEdgesVersion = filterNamedEdges(graph2
-                .incomingEdgesOf(version));
-        incomingEdgesGrade = computeLikelinessIncomingEdges(
-                incomingEdgesOriginal, incomingEdgesVersion);
-        return incomingEdgesGrade;
-    }
+	public List<Edge> filterNamedEdges(List<Edge> list) {
+		List<Edge> results = new ArrayList<>();
+		for (Edge edge : list) {
+			if (Node.Type.METHOD_CALL.equals(edge.getLabel())) {
+				results.add(edge);
+			}
+		}
+		return results;
+	}
+
+	public void createCallGraph(Node node, NamedDirectedMultigraph graph) {
+		List callers;
+//		if (this instanceof ChangeMethodSignatureDetection)
+//			callers = SearchHelper.findMethodCallers(node,
+//				new NullProgressMonitor(), true);
+//		else
+//			callers = SearchHelper.findMethodCallers(node,
+//				new NullProgressMonitor(), false);
+//		for (Iterator iter = callers.iterator(); iter.hasNext(); ) {
+//			IMember element = (IMember) iter.next();
+//			String nodeName = element.getElementName();
+//			String qualifiername = element.getDeclaringType()
+//				.getFullyQualifiedName('.');
+//			Node caller = graph.findNamedNode(qualifiername + "." + nodeName);
+//			if (caller != null) {
+//				Edge edge = factory.createEdge(caller, node, Node.METHOD_CALL);
+//				graph.addEdge(edge);
+//			}
+//		}
+//		node.setCreatedCallGraph();
+
+	}
+
+	protected void createCallGraph(Node original, Node version) {
+		if (!original.hasCallGraph()) {
+			createCallGraph(original, graph1);
+			original.setCreatedCallGraph();
+		}
+		if (!version.hasCallGraph()) {
+			createCallGraph(version, graph2);
+			version.setCreatedCallGraph();
+		}
+	}
+
+	public double analyzeIncomingEdges(Node original, Node version) {
+		double incomingEdgesGrade;
+		createCallGraph(original, version);
+		List<Edge> incomingEdgesOriginal = filterNamedEdges(new ArrayList<>(graph1
+			.incomingEdgesOf(original)));
+		List<Edge> incomingEdgesVersion = filterNamedEdges(new ArrayList<>(graph2
+			.incomingEdgesOf(version)));
+//		incomingEdgesGrade = computeLikelinessIncomingEdges(
+//			incomingEdgesOriginal, incomingEdgesVersion);
+		return 0;
+	}
+
 }
