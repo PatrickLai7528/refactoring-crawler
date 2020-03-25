@@ -13,6 +13,9 @@ import java.util.stream.Collectors;
 
 public abstract class RefactoringDetection {
 
+
+	@Getter
+	@Setter
 	private double threshold;
 
 	protected NamedDirectedMultigraph graph1;
@@ -59,6 +62,11 @@ public abstract class RefactoringDetection {
 		List<Node[]> refactoredNodes = new ArrayList<Node[]>();
 		List<Node[]> listWithFP = doDetectRefactorings(candidates, refactoredNodes);
 		return pruneFalsePositives(listWithFP);
+	}
+
+	protected String extractPotentialRename(String parentClassOriginal) {
+		String renamedName = getRenamingDictionary().get(parentClassOriginal);
+		return renamedName == null ? parentClassOriginal : renamedName;
 	}
 
 	private List<Node[]> doDetectRefactorings(List<Node[]> candidates, List<Node[]> refactoredNodes) {
@@ -317,5 +325,66 @@ public abstract class RefactoringDetection {
 		return parentName;
 	}
 
+	public double computeLikelinessIncomingEdges(List<Edge> edges1, List<Edge> edges2) {
+		double count = 0;
 
+		Edge[] arrEdge2 = edges2.toArray(new Edge[0]);
+
+		for (Edge edge1 : edges1) {
+			Node node1 = edge1.getSource();
+			for (int i = 0; i < arrEdge2.length; i++) {
+				Edge edge2 = arrEdge2[i];
+				if (edge2 != null) {
+					Node node2 = (Node) edge2.getSource();
+					if (isTheSameModuloRename(node1.getFullyQualifiedName(),
+						node2.getFullyQualifiedName())) {
+						count++;
+						// we mark this edge as already counted so that we don't
+						// count it
+						// twice when there are multiple edges between two nodes
+						arrEdge2[i] = null;
+					}
+				}
+			}
+		}
+
+		double fraction1 = (edges1.size() == 0 ? 0 : count / edges1.size());
+		double fraction2 = edges2.size() == 0 ? 0 : count / edges2.size();
+
+		return (fraction1 + fraction2) / 2.0;
+	}
+
+	protected boolean isTheSameModuloRename(String original, String version) {
+		Dictionary<String, String> dictionary = getRenamingDictionary();
+		if (version.equals(dictionary.get(original)))
+			return true;
+		if (original.lastIndexOf(".") == -1 || version.lastIndexOf(".") == -1)
+			return original.equals(version);
+		else if (original.substring(original.lastIndexOf(".")).equals(
+			version.substring(version.lastIndexOf("."))))
+			return isTheSameModuloRename(
+				extractFullyQualifiedParentName(original),
+				extractFullyQualifiedParentName(version));
+		else
+			return false;
+	}
+
+	public List<Node[]> pruneOriginalCandidatesImpl(List<Node[]> candidates) {
+		List<Node[]> prunedCandidates = new ArrayList<>();
+		for (Node[] pair : candidates) {
+			if (!(pair[0].getFullyQualifiedName().equals(pair[1]
+				.getFullyQualifiedName()))) {
+
+				if (pair[0].isAPI() && pair[1].isAPI()) {
+					Node n2inV1 = graph1.findNamedNode(pair[1]
+						.getFullyQualifiedName());
+
+					if ((n2inV1 == null)) {
+						prunedCandidates.add(pair);
+					}
+				}
+			}
+		}
+		return prunedCandidates;
+	}
 }

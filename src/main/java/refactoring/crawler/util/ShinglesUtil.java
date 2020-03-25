@@ -1,5 +1,7 @@
 package refactoring.crawler.util;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.jgrapht.graph.DirectedMultigraph;
 import org.jgrapht.traverse.BreadthFirstIterator;
 
@@ -9,6 +11,11 @@ public class ShinglesUtil {
 
 	private int w = 3;
 	private int sMethod = 8;
+
+	@Getter
+	@Setter
+	private double methodThreshold = 0.0;
+
 
 	private ShinglesStrategy shinglesStrategy;
 
@@ -27,8 +34,6 @@ public class ShinglesUtil {
 	private List<Node> newVersionClassList;
 	private List<Node> newVersionMethodList;
 	private List<Node> newVersionFieldList;
-
-	private double methodThreshold;
 
 	public ShinglesUtil() {
 		this.shinglesStrategy = new FactorOf2Strategy();

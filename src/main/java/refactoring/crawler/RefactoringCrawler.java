@@ -8,7 +8,9 @@ import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.MemoryTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
 import lombok.val;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.jgrapht.nio.dot.DOTExporter;
+import refactoring.crawler.detection.ChangeMethodSignatureDetection;
 import refactoring.crawler.detection.RefactoringDetection;
 import refactoring.crawler.detection.RenameMethodDetection;
 import refactoring.crawler.detection.SearchHelper;
@@ -17,10 +19,7 @@ import refactoring.crawler.util.*;
 
 import java.io.IOException;
 import java.rmi.server.ExportException;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class RefactoringCrawler {
 
@@ -40,11 +39,11 @@ public class RefactoringCrawler {
 			"}";
 		val newSource = "package com.MyCourses.dao.impl;" +
 			"public class A{" +
-			"   public void fooA(){" +
-			"       System.out.println(1);" +
+			"   public void foo(int i){" +
+			"       System.out.println(i);" +
 			"   }" +
 			"   public void bar(){" +
-			"       this.fooA();" +
+			"       this.foo(10);" +
 			"   }" +
 			"}";
 
@@ -91,33 +90,53 @@ public class RefactoringCrawler {
 		NamedDirectedMultigraph versionGraph = navigatorForVersion.getGraph();
 
 		shinglesUtil.initialize(originalGraph, versionGraph);
+//
+//		System.out.println("-----original graph-----");
+//		for (Edge e : originalGraph.edgeSet()) {
+//			System.out.println(originalGraph.getEdgeSource(e) + " --> " + originalGraph.getEdgeTarget(e));
+//		}
+//
+//		System.out.println("-----new version graph-----");
+//		for (Edge e : versionGraph.edgeSet()) {
+//			System.out.println(versionGraph.getEdgeSource(e) + " --> " + versionGraph.getEdgeTarget(e));
+//		}
 
-		System.out.println("-----original graph-----");
-		for (Edge e : originalGraph.edgeSet()) {
-			System.out.println(originalGraph.getEdgeSource(e) + " --> " + originalGraph.getEdgeTarget(e));
+
+//		detectRenameMethod(1, shinglesUtil, originalGraph, versionGraph);
+//		shinglesUtil.setMethodThreshold(0.5);
+		detectChangeMethodSignature(0.5, shinglesUtil, originalGraph, versionGraph);
+	}
+
+	private void detectChangeMethodSignature(double tChangeMethodSignature, ShinglesUtil shinglesUtil, NamedDirectedMultigraph originalGraph, NamedDirectedMultigraph versionGraph) {
+		List<Node[]> candidateChangedMethodSignatures = shinglesUtil.findSimilarMethods();
+		System.out.println(candidateChangedMethodSignatures.size());
+		RefactoringDetection detector = new ChangeMethodSignatureDetection(originalGraph, versionGraph);
+		detector.setThreshold(tChangeMethodSignature);
+		List<Node[]> changedMethodSignatures = detector.detectRefactorings(candidateChangedMethodSignatures);
+		if (changedMethodSignatures.size() > 0) {
+			System.out.println("-----change method signature result-----");
+			System.out.println(changedMethodSignatures);
+//			RefactoringCategory changeSignatureCategory = new RefactoringCategory();
+//			changeSignatureCategory.setName("ChangedMethodSignatures");
+//			changeSignatureCategory
+//				.setRefactoringPairs(changedMethodSignatures);
+//			refactoringList.add(changeSignatureCategory);
 		}
-
-		System.out.println("-----new version graph-----");
-		for (Edge e : versionGraph.edgeSet()) {
-			System.out.println(versionGraph.getEdgeSource(e) + " --> " + versionGraph.getEdgeTarget(e));
-		}
-
-		System.out.println(originalGraph.getNamedVertexMap());
-
-		detectRenameMethod(1, shinglesUtil, originalGraph, versionGraph);
-		val res = SearchHelper.findMethodCallers(originalGraph, (MethodNode) originalGraph.findNamedNode("com.MyCourses.dao.impl.A.foo"), false);
-		System.out.println(res);
 	}
 
 	private void detectRenameMethod(double tMethod, ShinglesUtil se, NamedDirectedMultigraph oldVersionGraph,
 	                                NamedDirectedMultigraph newVersionGraph) {
 		List<Node[]> candidateMethods = se.findSimilarMethods();
 		RefactoringDetection detector = new RenameMethodDetection(oldVersionGraph, newVersionGraph);
-//		detector.setThreshold(tMethod);
+		detector.setThreshold(tMethod);
 
 		List<Node[]> renamedMethods = detector.detectRefactorings(candidateMethods);
 		if (renamedMethods.size() > 0) {
-			System.out.println(renamedMethods);
+			System.out.println("-----result below-----");
+			renamedMethods.forEach(r -> {
+				System.out.println(r[0]);
+				System.out.println(r[1]);
+			});
 //            RefactoringCategory renameMethodCategory = new RefactoringCategory();
 //            renameMethodCategory.setName("RenamedMethods");
 //            renameMethodCategory.setRefactoringPairs(renamedMethods);

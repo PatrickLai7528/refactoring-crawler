@@ -1,20 +1,18 @@
 package refactoring.crawler.detection;
 
-import lombok.val;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IMember;
-import refactoring.crawler.project.IMethod;
 import refactoring.crawler.util.Edge;
+import refactoring.crawler.util.MethodNode;
 import refactoring.crawler.util.NamedDirectedMultigraph;
 import refactoring.crawler.util.Node;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 public abstract class MethodDetection extends RefactoringDetection {
-
 	public MethodDetection(NamedDirectedMultigraph graph, NamedDirectedMultigraph graph2) {
 		super(graph, graph2);
 	}
@@ -26,7 +24,7 @@ public abstract class MethodDetection extends RefactoringDetection {
 	}
 
 	@Override
-	public List pruneOriginalCandidates(List candidates) {
+	public List<Node[]> pruneOriginalCandidates(List<Node[]> candidates) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -39,34 +37,27 @@ public abstract class MethodDetection extends RefactoringDetection {
 
 	public List<Edge> filterNamedEdges(List<Edge> list) {
 		List<Edge> results = new ArrayList<>();
-		for (Edge edge : list) {
-			if (Node.Type.METHOD_CALL.equals(edge.getLabel())) {
-				results.add(edge);
+		for (Edge value : list) {
+			if (Node.Type.METHOD_CALL.equals(value.getLabel())) {
+				results.add(value);
 			}
 		}
 		return results;
 	}
 
 	public void createCallGraph(Node node, NamedDirectedMultigraph graph) {
-		List callers;
-//		if (this instanceof ChangeMethodSignatureDetection)
-//			callers = SearchHelper.findMethodCallers(node,
-//				new NullProgressMonitor(), true);
-//		else
-//			callers = SearchHelper.findMethodCallers(node,
-//				new NullProgressMonitor(), false);
-//		for (Iterator iter = callers.iterator(); iter.hasNext(); ) {
-//			IMember element = (IMember) iter.next();
-//			String nodeName = element.getElementName();
-//			String qualifiername = element.getDeclaringType()
-//				.getFullyQualifiedName('.');
-//			Node caller = graph.findNamedNode(qualifiername + "." + nodeName);
-//			if (caller != null) {
-//				Edge edge = factory.createEdge(caller, node, Node.METHOD_CALL);
-//				graph.addEdge(edge);
-//			}
-//		}
-//		node.setCreatedCallGraph();
+		List<String> callers;
+		if (this instanceof ChangeMethodSignatureDetection)
+			callers = SearchHelper.findMethodCallers(graph, (MethodNode) node, true);
+		else
+			callers = SearchHelper.findMethodCallers(graph, (MethodNode) node, false);
+		for (String s : callers) {
+			Node callerNode = graph.findNamedNode(s);
+			if (callerNode != null) {
+				graph.addEdge(callerNode, node, new Edge(Node.Type.METHOD_CALL));
+			}
+		}
+		node.setCreatedCallGraph();
 
 	}
 
@@ -84,13 +75,11 @@ public abstract class MethodDetection extends RefactoringDetection {
 	public double analyzeIncomingEdges(Node original, Node version) {
 		double incomingEdgesGrade;
 		createCallGraph(original, version);
-		List<Edge> incomingEdgesOriginal = filterNamedEdges(new ArrayList<>(graph1
-			.incomingEdgesOf(original)));
-		List<Edge> incomingEdgesVersion = filterNamedEdges(new ArrayList<>(graph2
-			.incomingEdgesOf(version)));
-//		incomingEdgesGrade = computeLikelinessIncomingEdges(
-//			incomingEdgesOriginal, incomingEdgesVersion);
-		return 0;
+		List<Edge> incomingEdgesOriginal = filterNamedEdges(new LinkedList<>(graph1.incomingEdgesOf(original)));
+		List<Edge> incomingEdgesVersion = filterNamedEdges(new LinkedList<>(graph2.incomingEdgesOf(version)));
+		incomingEdgesGrade = computeLikelinessIncomingEdges(
+			incomingEdgesOriginal, incomingEdgesVersion);
+		return incomingEdgesGrade;
 	}
 
 }
