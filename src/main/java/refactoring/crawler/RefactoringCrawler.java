@@ -2,12 +2,16 @@ package refactoring.crawler;
 
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
+import lombok.val;
+import org.jgrapht.nio.dot.DOTExporter;
 import refactoring.crawler.detection.RefactoringDetection;
 import refactoring.crawler.detection.RenameMethodDetection;
 import refactoring.crawler.project.IProject;
 import refactoring.crawler.util.*;
 
 import java.io.IOException;
+import java.rmi.server.ExportException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -17,50 +21,93 @@ public class RefactoringCrawler {
 	private String projectName;
 
 	public static void main(String[] args) throws IOException {
-		// creates an input stream for the file to be parsed
-		String source = "import detections.Detection;\n" +
-			"import detections.DetectionFactory;\n" +
-			"import org.eclipse.jdt.core.dom.AST;\n" +
-			"import utils.*;\n" +
+		val crawler = new RefactoringCrawler("project name");
+		val oldSource = "package com.MyCourses.dao.impl;/*\n" +
+			" * @PackageName com.MyCourses.dao.impl\n" +
+			" * @ClassName ForumDAO\n" +
+			" * @Author Lai Kin Meng\n" +
+			" * @Date 2019-02-25\n" +
+			" * @ProjectName MyCoursesServer\n" +
+			" */\n" +
 			"\n" +
-			"import java.util.List;\n" +
+			"import com.MyCourses.dao.IForumDAO;\n" +
+			"import com.MyCourses.entity.ForumEntity;\n" +
+			"import org.springframework.stereotype.Repository;\n" +
+			"import org.springframework.transaction.annotation.Transactional;\n" +
 			"\n" +
-			"import org.eclipse.jdt.core.dom.ASTParser;\n" +
+			"import javax.persistence.EntityManager;\n" +
+			"import javax.persistence.PersistenceContext;\n" +
 			"\n" +
-			"public class RefactoringCrawler {\n" +
-			"    public static void main(String[] args) {\n" +
-			"        ASTParser parser = ASTParser.newParser(AST.JLS13);\n" +
-			"//        parser.setSource();\n" +
+			"@Repository\n" +
+			"@Transactional\n" +
+			"public class ForumDAO implements IForumDAO {\n" +
+			"\n" +
+			"    @PersistenceContext\n" +
+			"    private EntityManager entityManager;\n" +
+			"\n" +
+			"\n" +
+			"    @Override\n" +
+			"    public ForumEntity retrieveByFid(Long fid) {\n" +
+			"        return entityManager.find(ForumEntity.class, fid);\n" +
 			"    }\n" +
 			"\n" +
-			"    public String detect(Component component1, Component component2) {\n" +
-			"\n" +
-			"        AbstractGraph originalGraph = ASTUtils.parseToAST(component1);\n" +
-			"        AbstractGraph newVersionGraph = ASTUtils.parseToAST(component2);\n" +
-			"\n" +
-			"        Shingles shingles1 = ShinglesUtils.annotateGraphNodesWithShingles(originalGraph);\n" +
-			"        Shingles shingles2 = ShinglesUtils.annotateGraphNodesWithShingles(newVersionGraph);\n" +
-			"\n" +
-			"        List<Pair> pairs = EntityUtils.findSimilarEntities(shingles1, shingles2);\n" +
-			"\n" +
-			"        RefactoringLog rlog = new RefactoringLog();\n" +
-			"\n" +
-			"        for (Detection detection : DetectionFactory.getDetectionList()) {\n" +
-			"            for (Pair pair : pairs) {\n" +
-			"                if (detection.isRelevant(pair)) {\n" +
-			"                    if (detection.isLikelyRefactoring(pair.getFirst(), pair.getSecond(), rlog)) {\n" +
-			"                        rlog.add(pair.getFirst(), pair.getSecond(), detection);\n" +
-			"                    }\n" +
-			"                }\n" +
-			"            }\n" +
-			"        }\n" +
-			"        return rlog.getResult();\n" +
+			"    @Override\n" +
+			"    public void update(ForumEntity forumEntity) {\n" +
+			"        ForumEntity f = retrieveByFid(forumEntity.getFid());\n" +
+			"        f.setTopic(forumEntity.getTopic());\n" +
+			"        f.setQuestionerStudent(forumEntity.getQuestionerStudent());\n" +
+			"        f.setQuestionerTeacher(forumEntity.getQuestionerTeacher());\n" +
+			"        f.setCommentEntityList(forumEntity.getCommentEntityList());\n" +
+			"        entityManager.flush();\n" +
 			"    }\n" +
-			"}\n";
-		CompilationUnit cu;
-		// parse the file
-		cu = StaticJavaParser.parse(source);
+			"}";
+		val newSource = "package com.MyCourses.dao.impl;/*\n" +
+			" * @PackageName com.MyCourses.dao.impl\n" +
+			" * @ClassName ForumDAO\n" +
+			" * @Author Lai Kin Meng\n" +
+			" * @Date 2019-02-25\n" +
+			" * @ProjectName MyCoursesServer\n" +
+			" */\n" +
+			"\n" +
+			"import com.MyCourses.dao.IForumDAO;\n" +
+			"import com.MyCourses.entity.ForumEntity;\n" +
+			"import org.springframework.stereotype.Repository;\n" +
+			"import org.springframework.transaction.annotation.Transactional;\n" +
+			"\n" +
+			"import javax.persistence.EntityManager;\n" +
+			"import javax.persistence.PersistenceContext;\n" +
+			"\n" +
+			"@Repository\n" +
+			"@Transactional\n" +
+			"public class ForumDAO implements IForumDAO {\n" +
+			"\n" +
+			"    @PersistenceContext\n" +
+			"    private EntityManager entityManager;\n" +
+			"\n" +
+			"\n" +
+			"    @Override\n" +
+			"    public ForumEntity retrieveByFid(Long fid) {\n" +
+			"        return entityManager.find(ForumEntity.class, fid);\n" +
+			"    }\n" +
+			"\n" +
+			"    @Override\n" +
+			"    public void updateAgain(ForumEntity forumEntity) {\n" +
+			"        ForumEntity f = retrieveByFid(forumEntity.getFid());\n" +
+			"        f.setTopic(forumEntity.getTopic());\n" +
+			"        f.setQuestionerStudent(forumEntity.getQuestionerStudent());\n" +
+			"        f.setQuestionerTeacher(forumEntity.getQuestionerTeacher());\n" +
+			"        f.setCommentEntityList(forumEntity.getCommentEntityList());\n" +
+			"        entityManager.flush();\n" +
+			"    }\n" +
+			"}";
 
+		val oldList = new ArrayList<String>();
+		val newList = new ArrayList<String>();
+
+		oldList.add(oldSource);
+		newList.add(newSource);
+
+		crawler.detect(oldList, newList);
 
 	}
 
@@ -88,11 +135,20 @@ public class RefactoringCrawler {
 
 		SourceNavigator navigatorForVersion = new SourceNavigator();
 		navigatorForVersion.setShinglesUtil(shinglesUtil);
-		navigatorForVersion.browseProject(newVersion);
+		navigatorForVersion.browseProject(projectName, newVersionCU);
 		NamedDirectedMultigraph versionGraph = navigatorForVersion.getGraph();
 
-
 		shinglesUtil.initialize(originalGraph, versionGraph);
+
+		System.out.println("-----original graph-----");
+		for (Edge e : originalGraph.edgeSet()) {
+			System.out.println(originalGraph.getEdgeSource(e) + " --> " + originalGraph.getEdgeTarget(e));
+		}
+
+		System.out.println("-----new version graph-----");
+		for (Edge e : versionGraph.edgeSet()) {
+			System.out.println(versionGraph.getEdgeSource(e) + " --> " + versionGraph.getEdgeTarget(e));
+		}
 
 		detectRenameMethod(1, shinglesUtil, originalGraph, versionGraph);
 	}

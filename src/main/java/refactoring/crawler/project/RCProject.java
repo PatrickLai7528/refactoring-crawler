@@ -28,18 +28,8 @@ public class RCProject implements IProject {
 		}
 	}
 
-
-	private void browsePackages(){
-		for(CompilationUnit unit: this.units){
-			unit.
-		}
-	}
-
-
 	@Override
 	public List<IPackage> getPackages() {
-		if (null != packages) {
-			browsePackages();
-		}
+		return null;
 	}
 }
