@@ -1,5 +1,6 @@
 package refactoring.crawler.util;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -108,7 +109,10 @@ public class SourceNavigator {
 										statementBody = methodBody.get().toString().trim();
 									} else
 										statementBody = statementBody(methodBody.get().toString()).trim();
+									System.out.println(String.format("----%s method body-----", method.getName().toString()));
+									System.out.println(statementBody);
 									int[] shingles = shinglesUtil.computeMethodShingles(statementBody);
+									System.out.println(Arrays.toString(shingles));
 									String qualifiedName = classNode.getFullyQualifiedName() + "."
 										+ method.getNameAsString();
 									MethodNode methodNode = new MethodNode(qualifiedName);

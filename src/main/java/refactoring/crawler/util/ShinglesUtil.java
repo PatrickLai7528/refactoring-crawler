@@ -36,7 +36,8 @@ public class ShinglesUtil {
 	private List<Node> newVersionFieldList;
 
 	public ShinglesUtil() {
-		this.shinglesStrategy = new FactorOf2Strategy();
+		this.shinglesStrategy = new DefaultStrategy();
+//		this.shinglesStrategy = new FactorOf2Strategy();
 	}
 
 	public List<String> tokenizer(String s) {

@@ -1,28 +1,30 @@
 package refactoring.crawler.util;
 
-public class FactorOf2Strategy implements ShinglesStrategy {
+/**
+ * @author Can Comertoglu
+ */
+public class DefaultStrategy implements ShinglesStrategy {
 
 	/**
 	 *
 	 */
-	public FactorOf2Strategy() {
+	public DefaultStrategy() {
 		super();
 	}
 
 	/* (non-Javadoc)
-	 * @Override
 	 * @see edu.uiuc.detectRefactorings.util.Strategy#computeNumShingles(int, int)
 	 */
 	public int upperBoundLimitForShinglesBag(int loc, int s_base) {
-		return s_base + (2 * loc);
+		return s_base;
 	}
 
 	public int upperBoundForClassShingles(int numMethods, int s_base) {
-		return s_base + (2 * numMethods);
+		return s_base;
 	}
 
 	public int upperBoundForPackageShingles(int numClasses, int s_base) {
-		return s_base + (2 * numClasses);
+		return s_base;
 	}
 
 }
