@@ -8,17 +8,17 @@ import lombok.Setter;
 
 public class MethodNode extends Node {
 
-    @AllArgsConstructor
-    public static class CalledMethod {
-        @Getter @Setter private String fullyQualifiedNameWithoutSignature;
+  @AllArgsConstructor
+  public static class CalledMethod {
+    @Getter @Setter private String fullyQualifiedNameWithoutSignature;
 
-        @Getter @Setter private String fullyQualifiedNameWithSignature;
-    }
+    @Getter @Setter private String fullyQualifiedNameWithSignature;
+  }
 
-    @Setter @Getter private List<CalledMethod> calledInside = new LinkedList<>();
+  @Setter @Getter private List<CalledMethod> calledInside = new LinkedList<>();
 
-    /** @param fullyQualifiedName fullyQualifiedName */
-    public MethodNode(String fullyQualifiedName) {
-        super(fullyQualifiedName, Type.METHOD);
-    }
+  /** @param fullyQualifiedName fullyQualifiedName */
+  public MethodNode(String fullyQualifiedName) {
+    super(fullyQualifiedName, Type.METHOD);
+  }
 }

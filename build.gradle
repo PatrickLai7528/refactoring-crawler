@@ -9,24 +9,8 @@
 plugins {
     // Apply the java-library plugin to add support for Java Library
     id 'java-library'
-    id "com.diffplug.gradle.spotless" version "3.16.0"
+    id 'com.github.sherter.google-java-format' version '0.8'
 }
-
-sourceCompatibility = 1.8
-
-spotless {
-    java {
-        googleJavaFormat()
-        indentWithTabs(2)
-        indentWithSpaces(4)
-    }
-}
-
-def hook = new File("$rootProject.projectDir/.git/hooks/pre-commit")
-hook.text = """#!/bin/bash
-echo "will run nova code format"
-./gradlew spotlessApply
-"""
 
 repositories {
     // Use jcenter for resolving dependencies.
