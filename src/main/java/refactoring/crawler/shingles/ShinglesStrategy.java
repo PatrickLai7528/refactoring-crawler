@@ -1,4 +1,4 @@
-package refactoring.crawler.util;
+package refactoring.crawler.shingles;
 
 public interface ShinglesStrategy {
     int upperBoundLimitForShinglesBag(int loc, int s_base);

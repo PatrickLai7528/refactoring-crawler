@@ -9,7 +9,24 @@
 plugins {
     // Apply the java-library plugin to add support for Java Library
     id 'java-library'
+    id "com.diffplug.gradle.spotless" version "3.16.0"
 }
+
+sourceCompatibility = 1.8
+
+spotless {
+    java {
+        googleJavaFormat()
+        indentWithTabs(2)
+        indentWithSpaces(4)
+    }
+}
+
+def hook = new File("$rootProject.projectDir/.git/hooks/pre-commit")
+hook.text = """#!/bin/bash
+echo "will run nova code format"
+./gradlew spotlessApply
+"""
 
 repositories {
     // Use jcenter for resolving dependencies.
@@ -35,9 +52,6 @@ dependencies {
 
     testCompileOnly 'org.projectlombok:lombok:1.18.12'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.12'
-    compile group: 'org.eclipse.jdt', name: 'org.eclipse.jdt.core', version: '3.20.0'
-
-    compile group: 'org.antlr', name: 'antlr4-runtime', version: '4.8-1'
 
     // This dependency is used internally, and not exposed to consumers on their own compile classpath.
     implementation 'com.google.guava:guava:27.1-jre'
