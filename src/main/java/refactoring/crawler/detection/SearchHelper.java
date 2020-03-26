@@ -4,14 +4,24 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.resolution.declarations.ResolvedMethodDeclaration;
 import lombok.Getter;
 import org.eclipse.core.runtime.IProgressMonitor;
-import refactoring.crawler.util.MethodNode;
-import refactoring.crawler.util.NamedDirectedMultigraph;
-import refactoring.crawler.util.Node;
+import refactoring.crawler.util.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class SearchHelper {
+	public static List<String> findFieldReferences(FieldNode node) {
+		return node.getFieldReferenceToMethod();
+	}
+
+	public static List<String> findSuperClassesOf(ClassNode node) {
+		return node.getSuperClasses();
+	}
+
+	public static List<String> findClassReferences(NamedDirectedMultigraph graph, ClassNode node) {
+		return node.getClassesImported();
+	}
+
 	public static List<String> findMethodCallers(NamedDirectedMultigraph graph, MethodNode node, boolean withSignature) {
 		return graph.vertexSet()
 			.stream()

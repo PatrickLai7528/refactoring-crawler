@@ -2,14 +2,13 @@ package refactoring.crawler.detection;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import refactoring.crawler.detection.methodDetection.MoveMethodDetection;
+import refactoring.crawler.util.ClassNode;
 import refactoring.crawler.util.Edge;
 import refactoring.crawler.util.NamedDirectedMultigraph;
 import refactoring.crawler.util.Node;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public abstract class RefactoringDetection {
 
@@ -386,5 +385,69 @@ public abstract class RefactoringDetection {
 			}
 		}
 		return prunedCandidates;
+	}
+
+	// TODO this is bug pruned
+	protected void createClassReferenceGraph(Node originalNode, NamedDirectedMultigraph graph) {
+//		try {
+		List<String> results = SearchHelper.findClassReferences(graph, (ClassNode) originalNode);
+		results.forEach(result -> {
+			if (graph.hasNamedNode(result))
+				graph.addEdge(originalNode, graph.findNamedNode(result), new Edge(Node.Type.CLASS_REFERENCE));
+		});
+		// Possible change to methods that instantiate classes
+		// from class -> class edges.
+//			for (String result : results) {
+////				IJavaElement resultNode = (IJavaElement) result;
+//				Node resultNode = graph.findNamedNode(result);
+//				String callingNode = null;
+//				if (resultNode instanceof IMethod) {
+//					IMethod rsm1 = (IMethod) resultNode;
+//					callingNode = rsm1.getDeclaringType()
+//						.getFullyQualifiedName('.');
+//					callingNode += "." + rsm1.getElementName();
+//				} else if (resultNode instanceof IType) {
+//					IType rst = (IType) resultNode;
+//					callingNode = rst.getFullyQualifiedName('.');
+//				} else if (resultNode instanceof IField) {
+//					IField rsf1 = (IField) resultNode;
+//					// Workaround
+//					callingNode = rsf1.getDeclaringType()
+//						.getFullyQualifiedName('.');
+//					callingNode += ".";
+//					callingNode += rsf1.getElementName();
+//				} else if (resultNode instanceof Initializer) {
+//					Initializer initializer = (Initializer) resultNode;
+//					VariableDeclarationFragment fieldDeclarationFragment = (VariableDeclarationFragment) ASTNodes
+//						.getParent(initializer,
+//							VariableDeclarationFragment.class);
+//					SimpleName simpleName = fieldDeclarationFragment.getName();
+//					IType parentType = (IType) ASTNodes.getParent(initializer,
+//						IType.class);
+//					callingNode = parentType.getFullyQualifiedName('.');
+//					callingNode += "." + simpleName.getFullyQualifiedName();
+//				}
+//
+//				// TODO treat the case when resultNode is instance of
+//				// ImportDeclaration
+//				// TODO treat the case when resultNode is instance of
+//				// Initializer
+//				// this appears in Loj4j1.3.0 in class LogManager, references to
+//				// Level
+//				if (callingNode == null) {
+//					System.out.print("");
+//				}
+//				if (callingNode != null) {
+//					Node callerNode = graph.findNamedNode(callingNode);
+//					if (callerNode != null)
+//						graph.addEdge(callerNode, originalNode,
+//							Node.CLASS_REFERENCE);
+//				}
+//
+//			}
+//
+//		} catch (CoreException e) {
+//			JavaPlugin.log(e);
+//		}
 	}
 }

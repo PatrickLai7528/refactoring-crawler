@@ -1,28 +1,16 @@
 package refactoring.crawler.util;
 
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.NodeList;
-import com.github.javaparser.ast.PackageDeclaration;
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
-import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
-import com.github.javaparser.resolution.declarations.ResolvedMethodDeclaration;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.val;
-import org.eclipse.jdt.core.Signature;
-import refactoring.crawler.detection.SearchHelper;
-import refactoring.crawler.project.*;
-
-import javax.annotation.Nonnull;
 
 public class SourceNavigator {
 
@@ -59,6 +47,14 @@ public class SourceNavigator {
 		this.graph.addNamedVertex(projectNode);
 		compilationUnits.forEach(cu -> {
 			val packageDeclaration = cu.getPackageDeclaration();
+			val importDeclarations = cu.getImports();
+
+			val classesImported = new LinkedList<String>();
+
+			importDeclarations.forEach(importDeclaration -> {
+				classesImported.add(importDeclaration.getName().asString());
+			});
+
 			if (packageDeclaration.isPresent()) {
 				val packageName = packageDeclaration.get().getNameAsString();
 				val packageNode = new Node(packageName, Node.Type.PACKAGE);
@@ -70,8 +66,18 @@ public class SourceNavigator {
 						val classOrInterfaceDeclaration = type.asClassOrInterfaceDeclaration();
 						val className = classOrInterfaceDeclaration.getFullyQualifiedName();
 						if (className.isPresent()) {
-							val classNode = new Node(className.get(), Node.Type.CLASS);
+							val classNode = new ClassNode(className.get());
 							classNode.setProjectName(projectName);
+
+							List<String> extendedClasses = classOrInterfaceDeclaration
+								.getExtendedTypes()
+								.stream()
+								.map(extendType -> extendType.resolve().getQualifiedName())
+								.collect(Collectors.toList());
+
+							classNode.setStatic(classOrInterfaceDeclaration.isStatic());
+							classNode.setSuperClasses(extendedClasses);
+							classNode.setClassesImported(classesImported);
 							classNode.setDeprecated(classOrInterfaceDeclaration.getAnnotationByClass(Deprecated.class).isPresent());
 							classNode.setInterface(classOrInterfaceDeclaration.isInterface());
 
@@ -83,39 +89,39 @@ public class SourceNavigator {
 							graph.addNamedVertex(classNode);
 							graph.addEdge(packageNode, classNode, new Edge(Node.Type.CLASS));
 
-							// fields
-							List<FieldDeclaration> fieldDeclarations = classOrInterfaceDeclaration.getFields();
-							fieldDeclarations.forEach(field -> {
-								int[] shingles = this.shinglesUtil.computeMethodShingles(field.getVariables().toString());
-								String fullyQualifiedName = classNode.getFullyQualifiedName() + "." + field.getVariables().toString();
-								Node fieldNode = new Node(fullyQualifiedName, Node.Type.FIELD);
-								fieldNode.setProjectName(this.projectName);
-								fieldNode.setShingles(shingles);
-//								fieldNode.setFlags(field.getFlags());
-								fieldNode.setSignature(field.getCommonType().asString());
-								fieldNode.setDeprecated(field.getAnnotationByClass(Deprecated.class).isPresent());
-								graph.addNamedVertex(fieldNode);
-								graph.addEdge(classNode, fieldNode, new Edge(Node.Type.FIELD));
-							});
-
 							// methods
 							List<MethodDeclaration> methodDeclarations = classOrInterfaceDeclaration.getMethods();
+
+							// filed fqn -> methods fqn
+							Map<String, List<String>> fieldReferenceToMethods = new HashMap<>();
 
 							methodDeclarations.forEach(method -> {
 								String statementBody = "";
 								val methodBody = method.getBody();
+
 								if (methodBody.isPresent()) {
 									if (classNode.isInterface() || (useJavadocComments)) {
 										statementBody = methodBody.get().toString().trim();
 									} else
 										statementBody = statementBody(methodBody.get().toString()).trim();
-									System.out.println(String.format("----%s method body-----", method.getName().toString()));
-									System.out.println(statementBody);
 									int[] shingles = shinglesUtil.computeMethodShingles(statementBody);
-									System.out.println(Arrays.toString(shingles));
 									String qualifiedName = classNode.getFullyQualifiedName() + "."
 										+ method.getNameAsString();
 									MethodNode methodNode = new MethodNode(qualifiedName);
+
+									List<String> methodReferencedFields = method
+										.findAll(FieldAccessExpr.class)
+										.stream()
+										.map(fieldAccessExpr -> classNode.getFullyQualifiedName() + "." + fieldAccessExpr.resolve().getName())
+										.collect(Collectors.toList());
+
+									methodReferencedFields.forEach(field -> {
+										if (fieldReferenceToMethods.containsKey(field)) {
+											List<String> methods = fieldReferenceToMethods.get(field);
+											methods.add(qualifiedName);
+											fieldReferenceToMethods.put(field, methods);
+										}
+									});
 
 									List<MethodNode.CalledMethod> calledMethodList = method
 										.findAll(MethodCallExpr.class)
@@ -133,6 +139,7 @@ public class SourceNavigator {
 									}
 									if (method.getAnnotationByClass(Deprecated.class).isPresent())
 										methodNode.setDeprecated(true);
+									methodNode.setStatic(method.isStatic());
 									methodNode.setProjectName(projectName);
 									methodNode.setShingles(shingles);
 //									methodNode.setFlags(method.getFlags());
@@ -141,6 +148,24 @@ public class SourceNavigator {
 									graph.addEdge(classNode, methodNode, new Edge(Node.Type.METHOD));
 								}
 							});
+
+							// fields
+							List<FieldDeclaration> fieldDeclarations = classOrInterfaceDeclaration.getFields();
+							fieldDeclarations.forEach(field -> {
+								int[] shingles = this.shinglesUtil.computeMethodShingles(field.getVariables().toString());
+								String fullyQualifiedName = classNode.getFullyQualifiedName() + "." + field.getVariables().toString();
+								FieldNode fieldNode = new FieldNode(fullyQualifiedName);
+								fieldNode.setFieldReferenceToMethod(fieldReferenceToMethods.get(fullyQualifiedName));
+								fieldNode.setProjectName(this.projectName);
+								fieldNode.setShingles(shingles);
+//								fieldNode.setFlags(field.getFlags());
+								fieldNode.setStatic(field.isStatic());
+								fieldNode.setSignature(field.getCommonType().asString());
+								fieldNode.setDeprecated(field.getAnnotationByClass(Deprecated.class).isPresent());
+								graph.addNamedVertex(fieldNode);
+								graph.addEdge(classNode, fieldNode, new Edge(Node.Type.FIELD));
+							});
+
 						}
 					}
 				});

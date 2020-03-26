@@ -1,14 +1,13 @@
-package refactoring.crawler.detection;
+package refactoring.crawler.detection.methodDetection;
 
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.jdt.core.IMember;
+import refactoring.crawler.detection.RefactoringDetection;
+import refactoring.crawler.detection.SearchHelper;
 import refactoring.crawler.util.Edge;
 import refactoring.crawler.util.MethodNode;
 import refactoring.crawler.util.NamedDirectedMultigraph;
 import refactoring.crawler.util.Node;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 

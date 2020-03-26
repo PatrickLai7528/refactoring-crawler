@@ -2,66 +2,40 @@ package refactoring.crawler;
 
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
-import com.github.javaparser.symbolsolver.resolution.typesolvers.MemoryTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
-import lombok.val;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.jgrapht.nio.dot.DOTExporter;
-import refactoring.crawler.detection.ChangeMethodSignatureDetection;
+import lombok.Getter;
+import refactoring.crawler.detection.classDetection.RenameClassDetection;
+import refactoring.crawler.detection.methodDetection.*;
 import refactoring.crawler.detection.RefactoringDetection;
-import refactoring.crawler.detection.RenameMethodDetection;
-import refactoring.crawler.detection.SearchHelper;
-import refactoring.crawler.project.IProject;
 import refactoring.crawler.util.*;
 
-import java.io.IOException;
-import java.rmi.server.ExportException;
 import java.util.*;
 
 public class RefactoringCrawler {
 
+	public static enum Settings {
+		T_RENAME_METHOD,
+		T_RENAME_CLASS,
+		T_MOVE_METHOD,
+		T_PULL_UP_METHOD,
+		T_PUSH_DOWN_METHOD,
+		T_CHANGE_METHOD_SIGNATURE
+	}
+
 	private String projectName;
+	private Dictionary<Settings, Double> settings;
 
-	public static void main(String[] args) throws IOException {
-		val crawler = new RefactoringCrawler("project name");
-		val oldSource = "package com.MyCourses.dao.impl;" +
-			"public class A{" +
-			"   public void foo(){" +
-			"       System.out.println(1);" +
-			"   }" +
-			"   " +
-			"   public void bar(){" +
-			"       this.foo();" +
-			"   }" +
-			"}";
-		val newSource = "package com.MyCourses.dao.impl;" +
-			"public class A{" +
-			"   public void foo(int i){" +
-			"       System.out.println(i);" +
-			"   }" +
-			"   public void bar(){" +
-			"       this.foo(10);" +
-			"   }" +
-			"}";
+	@Getter
+	private List<RefactoringCategory> refactoringCategories = new LinkedList<>();
 
-		val oldList = new ArrayList<String>();
-		val newList = new ArrayList<String>();
-
-		oldList.add(oldSource);
-		newList.add(newSource);
-
-		crawler.detect(oldList, newList);
-
-	}
-
-	public RefactoringCrawler(String projectName) {
+	public RefactoringCrawler(String projectName, Dictionary<Settings, Double> settings) {
 		this.projectName = projectName;
+		this.settings = settings;
 	}
 
-	private List<CompilationUnit> parse(List<String> files) {
+	private static List<CompilationUnit> parse(List<String> files) {
 		TypeSolver typeSolver = new ReflectionTypeSolver();
 		JavaSymbolSolver symbolSolver = new JavaSymbolSolver(typeSolver);
 		StaticJavaParser.getConfiguration().setSymbolResolver(symbolSolver);
@@ -77,8 +51,8 @@ public class RefactoringCrawler {
 	public void detect(List<String> oldVersion, List<String> newVersion) {
 		ShinglesUtil shinglesUtil = new ShinglesUtil();
 
-		List<CompilationUnit> oldVersionCU = this.parse(oldVersion);
-		List<CompilationUnit> newVersionCU = this.parse(newVersion);
+		List<CompilationUnit> oldVersionCU = parse(oldVersion);
+		List<CompilationUnit> newVersionCU = parse(newVersion);
 		SourceNavigator navigator = new SourceNavigator();
 		navigator.setShinglesUtil(shinglesUtil);
 		navigator.browseProject(projectName, oldVersionCU);
@@ -90,37 +64,41 @@ public class RefactoringCrawler {
 		NamedDirectedMultigraph versionGraph = navigatorForVersion.getGraph();
 
 		shinglesUtil.initialize(originalGraph, versionGraph);
-//
-//		System.out.println("-----original graph-----");
-//		for (Edge e : originalGraph.edgeSet()) {
-//			System.out.println(originalGraph.getEdgeSource(e) + " --> " + originalGraph.getEdgeTarget(e));
-//		}
-//
-//		System.out.println("-----new version graph-----");
-//		for (Edge e : versionGraph.edgeSet()) {
-//			System.out.println(versionGraph.getEdgeSource(e) + " --> " + versionGraph.getEdgeTarget(e));
-//		}
+
+		// must in this order
+
+		double tRenameMethod = this.settings.get(Settings.T_RENAME_METHOD);
+		this.detectRenameMethod(tRenameMethod, shinglesUtil, originalGraph, versionGraph);
+
+		double tRenameClass = this.settings.get(Settings.T_RENAME_CLASS);
+		detectRenameClass(tRenameClass, shinglesUtil, originalGraph, versionGraph);
 
 
-//		detectRenameMethod(1, shinglesUtil, originalGraph, versionGraph);
-//		shinglesUtil.setMethodThreshold(0.5);
-		detectChangeMethodSignature(0.5, shinglesUtil, originalGraph, versionGraph);
+		double tMoveMethod = this.settings.get(Settings.T_MOVE_METHOD);
+		detectMoveMethod(tMoveMethod, shinglesUtil, originalGraph, versionGraph);
+
+		double tPullUpMethod = this.settings.get(Settings.T_PULL_UP_METHOD);
+		detectPullUpMethod(tPullUpMethod, shinglesUtil,
+			originalGraph, versionGraph);
+
+		double tPushDownMethod = this.settings.get(Settings.T_PUSH_DOWN_METHOD);
+		detectPushDownMethod(tPushDownMethod, shinglesUtil, originalGraph, versionGraph);
+
+		double tChangeMethodSignature = this.settings.get(Settings.T_CHANGE_METHOD_SIGNATURE);
+		detectChangeMethodSignature(tChangeMethodSignature, shinglesUtil, originalGraph, versionGraph);
 	}
 
-	private void detectChangeMethodSignature(double tChangeMethodSignature, ShinglesUtil shinglesUtil, NamedDirectedMultigraph originalGraph, NamedDirectedMultigraph versionGraph) {
+	private void detectChangeMethodSignature(double tChangeMethodSignature, ShinglesUtil
+		shinglesUtil, NamedDirectedMultigraph originalGraph, NamedDirectedMultigraph versionGraph) {
 		List<Node[]> candidateChangedMethodSignatures = shinglesUtil.findSimilarMethods();
-		System.out.println(candidateChangedMethodSignatures.size());
 		RefactoringDetection detector = new ChangeMethodSignatureDetection(originalGraph, versionGraph);
 		detector.setThreshold(tChangeMethodSignature);
 		List<Node[]> changedMethodSignatures = detector.detectRefactorings(candidateChangedMethodSignatures);
 		if (changedMethodSignatures.size() > 0) {
-			System.out.println("-----change method signature result-----");
-			System.out.println(changedMethodSignatures);
-//			RefactoringCategory changeSignatureCategory = new RefactoringCategory();
-//			changeSignatureCategory.setName("ChangedMethodSignatures");
-//			changeSignatureCategory
-//				.setRefactoringPairs(changedMethodSignatures);
-//			refactoringList.add(changeSignatureCategory);
+			RefactoringCategory changeSignatureCategory = new RefactoringCategory();
+			changeSignatureCategory.setName("ChangedMethodSignatures");
+			changeSignatureCategory.setRefactoringPairs(changedMethodSignatures);
+			this.refactoringCategories.add(changeSignatureCategory);
 		}
 	}
 
@@ -132,16 +110,65 @@ public class RefactoringCrawler {
 
 		List<Node[]> renamedMethods = detector.detectRefactorings(candidateMethods);
 		if (renamedMethods.size() > 0) {
-			System.out.println("-----result below-----");
-			renamedMethods.forEach(r -> {
-				System.out.println(r[0]);
-				System.out.println(r[1]);
-			});
-//            RefactoringCategory renameMethodCategory = new RefactoringCategory();
-//            renameMethodCategory.setName("RenamedMethods");
-//            renameMethodCategory.setRefactoringPairs(renamedMethods);
-//            refactoringList.add(renameMethodCategory);
+			RefactoringCategory renameMethodCategory = new RefactoringCategory();
+			renameMethodCategory.setName("RenamedMethods");
+			renameMethodCategory.setRefactoringPairs(renamedMethods);
+			this.refactoringCategories.add(renameMethodCategory);
 		}
 	}
 
+	public void detectRenameClass(double tClass, ShinglesUtil se, NamedDirectedMultigraph originalGraph, NamedDirectedMultigraph versionGraph) {
+		List<Node[]> candidateClasses = se.findSimilarClasses();
+		RefactoringDetection detector = new RenameClassDetection(originalGraph,
+			versionGraph);
+		detector.setThreshold(tClass);
+		List<Node[]> renamedClasses = detector.detectRefactorings(candidateClasses);
+		if (renamedClasses.size() > 0) {
+			RefactoringCategory renameClassCategory = new RefactoringCategory();
+			renameClassCategory.setName("RenamedClasses");
+			renameClassCategory.setRefactoringPairs(renamedClasses);
+			this.refactoringCategories.add(renameClassCategory);
+		}
+	}
+
+	public void detectMoveMethod(double tMoveMethod, ShinglesUtil se, NamedDirectedMultigraph originalGraph, NamedDirectedMultigraph versionGraph) {
+		List<Node[]> methodCandidates = se.findSimilarMethods();
+		se.findSimilarClasses();
+		RefactoringDetection detector = new MoveMethodDetection(this, originalGraph, versionGraph);
+		detector.setThreshold(tMoveMethod);
+		List<Node[]> movedMethods = detector.detectRefactorings(methodCandidates);
+		if (movedMethods.size() > 0) {
+			RefactoringCategory moveMethodCategory = new RefactoringCategory();
+			moveMethodCategory.setName("MovedMethods");
+			moveMethodCategory.setRefactoringPairs(movedMethods);
+			this.refactoringCategories.add(moveMethodCategory);
+		}
+	}
+
+	public void detectPullUpMethod(double tPullUpMethod, ShinglesUtil se, NamedDirectedMultigraph originalGraph, NamedDirectedMultigraph versionGraph) {
+		List<Node[]> candidatePullUpMethods = se.findPullUpMethodCandidates();
+		RefactoringDetection detector = new PullUpMethodDetection(
+			originalGraph, versionGraph);
+		detector.setThreshold(tPullUpMethod);
+		List<Node[]> pullUpMethodResults = detector.detectRefactorings(candidatePullUpMethods);
+		if (pullUpMethodResults.size() > 0) {
+			RefactoringCategory pullUpCategory = new RefactoringCategory();
+			pullUpCategory.setName("PulledUpMethods");
+			pullUpCategory.setRefactoringPairs(pullUpMethodResults);
+			this.refactoringCategories.add(pullUpCategory);
+		}
+	}
+
+	public void detectPushDownMethod(double tPushDownMethod, ShinglesUtil se, NamedDirectedMultigraph originalGraph, NamedDirectedMultigraph versionGraph) {
+		List<Node[]> candidatePushDownMethods = se.findPushDownMethodCandidates();
+		RefactoringDetection detector = new PushDownMethodDetection(originalGraph, versionGraph);
+		detector.setThreshold(tPushDownMethod);
+		List<Node[]> pushDownMethodResults = detector.detectRefactorings(candidatePushDownMethods);
+		if (pushDownMethodResults.size() > 0) {
+			RefactoringCategory pushDownCategory = new RefactoringCategory();
+			pushDownCategory.setName("PushedDownMethods");
+			pushDownCategory.setRefactoringPairs(pushDownMethodResults);
+			this.refactoringCategories.add(pushDownCategory);
+		}
+	}
 }

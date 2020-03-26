@@ -2,6 +2,7 @@ package refactoring.crawler.util;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.jgrapht.graph.DirectedMultigraph;
 import org.jgrapht.traverse.BreadthFirstIterator;
 
@@ -9,8 +10,10 @@ import java.util.*;
 
 public class ShinglesUtil {
 
-	private int w = 3;
+	private int w = 2;
+	private int sClass = 10;
 	private int sMethod = 8;
+	private double classThreshold = 0.0;
 
 	@Getter
 	@Setter
@@ -19,11 +22,13 @@ public class ShinglesUtil {
 
 	private ShinglesStrategy shinglesStrategy;
 
-	private DirectedMultigraph<Node, Edge> oldVersionGraph;
+	private NamedDirectedMultigraph oldVersionGraph;
 
-	private DirectedMultigraph<Node, Edge> newVersionGraph;
+	private NamedDirectedMultigraph newVersionGraph;
 
-	private List<Node[]> similarMethods;
+	private List<Node[]> similarMethods = new LinkedList<>();
+	private List<Node[]> similarClasses = new LinkedList<>();
+
 
 	private List<Node> oldVersionPackageList;
 	private List<Node> oldVersionClassList;
@@ -124,8 +129,6 @@ public class ShinglesUtil {
 		this.oldVersionGraph = oldVersionGraph;
 		this.newVersionGraph = newVersionGraph;
 
-		this.similarMethods = new LinkedList<>();
-
 		this.oldVersionPackageList = new ArrayList<>();
 		this.oldVersionClassList = new ArrayList<>();
 		this.oldVersionMethodList = new ArrayList<>();
@@ -204,5 +207,91 @@ public class ShinglesUtil {
 			}
 		}
 		return grade;
+	}
+
+
+	/**
+	 * @param classes
+	 * @param graph   <br>
+	 *                For each class nodes in classes, find the shingles by
+	 *                concatenating shingles in methods of its subtree. The
+	 *                parameter s_class will determine the maximum size of shingles
+	 */
+	private void computeClassShingles(List<Node> classes, NamedDirectedMultigraph graph) {
+		for (Node clasz : classes) {
+			// We will keep the number of methods for the class with the
+			// numberOfMethods variable.
+			int numberOfMethods = 0;
+			List<Edge> outEdges = new ArrayList<>(graph.outgoingEdgesOf(clasz));
+			int methodsTotalShingleSize = 0;
+			for (Edge e : outEdges) {
+				Node neighbor = e.oppositeVertex(clasz);
+				if (neighbor.getType().toString().compareToIgnoreCase(Node.Type.METHOD.toString()) == 0) {
+					methodsTotalShingleSize += neighbor.getShingles().length;
+					// Here we update the method count.
+					numberOfMethods++;
+				}
+			}
+
+			// fill allShinglesFromMethods with shingles from all the methods in
+			// the class
+			int[] allShinglesFromMethods = new int[methodsTotalShingleSize];
+			Arrays.fill(allShinglesFromMethods, Integer.MAX_VALUE);
+			int index = 0;
+			for (Edge e : outEdges) {
+				Node neighbor = e.oppositeVertex(clasz);
+				if (neighbor.getType().toString().compareToIgnoreCase(Node.Type.METHOD.toString()) == 0) {
+					for (int j = 0; j < neighbor.getShingles().length; j++) {
+						allShinglesFromMethods[index] = neighbor.getShingles()[j];
+						index++;
+					}
+				}
+			}
+
+			int upperBoundForClassShingles = this.shinglesStrategy
+				.upperBoundForClassShingles(numberOfMethods, sClass);
+			Arrays.sort(allShinglesFromMethods);
+
+			upperBoundForClassShingles = Math.min(upperBoundForClassShingles,
+				allShinglesFromMethods.length);
+
+			int[] retVal = new int[upperBoundForClassShingles];
+			if (upperBoundForClassShingles >= 0)
+				System.arraycopy(allShinglesFromMethods, 0, retVal, 0, upperBoundForClassShingles);
+			clasz.setShingles(retVal);
+		}
+	}
+
+
+	public List<Node[]> findSimilarClasses() {
+		if (this.similarClasses.isEmpty()) {
+			computeClassShingles(oldVersionClassList, oldVersionGraph);
+			computeClassShingles(newVersionClassList, newVersionGraph);
+			List<Node[]> simClass = new ArrayList<>();
+			for (Node c : this.oldVersionClassList) {
+				if (!c.isAPI())
+					continue;
+
+				for (Node c2 : this.oldVersionClassList) {
+					if (!c2.isAPI())
+						continue;
+
+					if (howMuchAlike(c.getShingles(), c2.getShingles()) > classThreshold) {
+						Node[] arr = {c, c2};
+						simClass.add(arr);
+					}
+				}
+			}
+			this.similarClasses = simClass;
+		}
+		return this.similarClasses;
+	}
+
+	public List<Node[]> findPullUpMethodCandidates() {
+		return findSimilarMethods();
+	}
+
+	public List<Node[]> findPushDownMethodCandidates() {
+		return findSimilarMethods();
 	}
 }

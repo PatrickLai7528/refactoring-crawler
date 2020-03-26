@@ -30,4 +30,9 @@ public class NamedDirectedMultigraph extends DirectedMultigraph<Node, Edge> {
 	public Node findNamedNode(String name) {
 		return namedVertexMap.get(name);
 	}
+
+
+	public boolean hasNamedNode(String name) {
+		return namedVertexMap.containsKey(name);
+	}
 }

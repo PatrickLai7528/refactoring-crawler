@@ -1,11 +1,10 @@
-package refactoring.crawler.detection;
+package refactoring.crawler.detection.methodDetection;
 
 import refactoring.crawler.util.NamedDirectedMultigraph;
 import refactoring.crawler.util.Node;
 
 import java.util.ArrayList;
 import java.util.Dictionary;
-import java.util.Iterator;
 import java.util.List;
 
 
@@ -56,7 +55,7 @@ public class RenameMethodDetection extends MethodDetection {
 	public List<Node[]> pruneFalsePositives(List<Node[]> listWithFP) {
 		List<Node[]> prunedList = super.pruneFalsePositives(listWithFP);
 		for (int i = 0; i < prunedList.size(); i++) {
-			Node[] pair = (Node[]) prunedList.get(i);
+			Node[] pair = prunedList.get(i);
 			Node target = pair[1];
 			String targetName = target.getSimpleName().toLowerCase().trim();
 			List<Node[]> allPairsWithSameTarget = new ArrayList<Node[]>();

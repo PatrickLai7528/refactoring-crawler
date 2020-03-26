@@ -62,6 +62,10 @@ public class Node {
 	@Getter
 	private boolean isInterface = false;
 
+	@Getter
+	@Setter
+	private boolean isStatic = false;
+
 	/**
 	 * @param fullyQualifiedName fullyQualifiedName
 	 * @param type               type

@@ -1,4 +1,4 @@
-package refactoring.crawler.detection;
+package refactoring.crawler.detection.methodDetection;
 
 import refactoring.crawler.util.Edge;
 import refactoring.crawler.util.NamedDirectedMultigraph;
