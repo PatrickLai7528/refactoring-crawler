@@ -76,7 +76,7 @@ public abstract class RefactoringDetection {
         // candidates.remove(pair); acivating this line would fail to
         // detect those cases when two
         // types of refactorings happened to the same node
-        updateFeedbackLoop(pair);
+//        updateFeedbackLoop(pair);
       }
     }
     if (foundNewRefactoring) {
