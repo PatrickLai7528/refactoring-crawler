@@ -5,11 +5,46 @@
  * For more details take a look at the Java Libraries chapter in the Gradle
  * User Manual available at https://docs.gradle.org/5.5/userguide/java_library_plugin.html
  */
-
 plugins {
     // Apply the java-library plugin to add support for Java Library
     id 'java-library'
     id 'com.github.sherter.google-java-format' version '0.8'
+    id 'jacoco'
+}
+
+jacoco {
+    toolVersion = "0.8.5"
+    reportsDir = file("$buildDir/customJacocoReportDir")
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled false
+        csv.enabled false
+        html.destination file("${buildDir}/jacocoHtml")
+    }
+}
+
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                minimum = 0.5
+            }
+        }
+
+        rule {
+            enabled = false
+            element = 'CLASS'
+            includes = ['org.gradle.*']
+
+            limit {
+                counter = 'LINE'
+                value = 'TOTALCOUNT'
+                maximum = 0.3
+            }
+        }
+    }
 }
 
 repositories {
@@ -47,7 +82,6 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.4.2'
     implementation 'org.jetbrains:annotations:15.0'
 }
-
 test {
     // Use junit platform for unit tests
     useJUnitPlatform()
