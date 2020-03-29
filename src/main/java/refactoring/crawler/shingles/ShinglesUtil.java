@@ -277,7 +277,7 @@ public class ShinglesUtil {
       for (Node c : this.oldVersionClassList) {
         if (!c.isAPI()) continue;
 
-        for (Node c2 : this.oldVersionClassList) {
+        for (Node c2 : this.newVersionClassList) {
           if (!c2.isAPI()) continue;
 
           if (howMuchAlike(c.getShingles(), c2.getShingles()) > classThreshold) {
