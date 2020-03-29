@@ -19,15 +19,16 @@ public class RenameMethodDetection extends MethodDetection {
    */
   public List<Node[]> pruneOriginalCandidates(List<Node[]> candidates) {
     List<Node[]> prePrunedMethods = super.pruneOriginalCandidatesImpl(candidates);
-    List<Node[]> candidatesWithSameParentClass = new ArrayList();
+    List<Node[]> candidatesWithSameParentClass = new ArrayList<>();
     for (Node[] pair : prePrunedMethods) {
       Node original = pair[0];
       Node version = pair[1];
       String parentClassOriginal = extractFullyQualifiedParentName(original);
       String parentClassVersion = extractFullyQualifiedParentName(version);
-      if (isTheSameModuloRename(parentClassOriginal, parentClassVersion)
-          && (!(original.getSimpleName().equals(version.getSimpleName()))))
-        candidatesWithSameParentClass.add(pair);
+      boolean isTheSameModuloRename =
+          isTheSameModuloRename(parentClassOriginal, parentClassVersion);
+      boolean isSimpleNameEquals = original.getSimpleName().equals(version.getSimpleName());
+      if (isTheSameModuloRename && !isSimpleNameEquals) candidatesWithSameParentClass.add(pair);
     }
 
     return candidatesWithSameParentClass;

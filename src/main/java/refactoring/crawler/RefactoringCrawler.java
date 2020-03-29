@@ -2,8 +2,14 @@ package refactoring.crawler;
 
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.NodeList;
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.TypeDeclaration;
+import com.github.javaparser.resolution.declarations.ResolvedReferenceTypeDeclaration;
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
+import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
+import com.github.javaparser.symbolsolver.resolution.typesolvers.MemoryTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
 import java.util.*;
 import lombok.Getter;
@@ -37,9 +43,34 @@ public class RefactoringCrawler {
   }
 
   private static List<CompilationUnit> parse(List<String> files) {
+
     TypeSolver typeSolver = new ReflectionTypeSolver();
     JavaSymbolSolver symbolSolver = new JavaSymbolSolver(typeSolver);
     StaticJavaParser.getConfiguration().setSymbolResolver(symbolSolver);
+
+    MemoryTypeSolver memoryTypeSolver = new MemoryTypeSolver();
+    for (String source : files) {
+      CompilationUnit cu = StaticJavaParser.parse(source);
+      NodeList<TypeDeclaration<?>> typeDeclarations = cu.getTypes();
+      ClassOrInterfaceDeclaration classOrInterfaceDeclaration = null;
+      for (TypeDeclaration<?> typeDeclaration : typeDeclarations) {
+        if (typeDeclaration.isClassOrInterfaceDeclaration()) {
+          classOrInterfaceDeclaration = typeDeclaration.asClassOrInterfaceDeclaration();
+        }
+      }
+      if (null != classOrInterfaceDeclaration) {
+        Optional<String> fullyQualifiedName = classOrInterfaceDeclaration.getFullyQualifiedName();
+        if (fullyQualifiedName.isPresent()) {
+          ResolvedReferenceTypeDeclaration resolvedReferenceTypeDeclaration =
+              classOrInterfaceDeclaration.resolve();
+          memoryTypeSolver.addDeclaration(
+              fullyQualifiedName.get(), resolvedReferenceTypeDeclaration);
+        }
+      }
+    }
+
+    typeSolver = new CombinedTypeSolver(new ReflectionTypeSolver(), memoryTypeSolver);
+    StaticJavaParser.getConfiguration().setSymbolResolver(new JavaSymbolSolver(typeSolver));
 
     List<CompilationUnit> resList = new LinkedList<>();
     for (String source : files) {

@@ -2,10 +2,7 @@ package refactoring.crawler.detection;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import refactoring.crawler.graph.ClassNode;
-import refactoring.crawler.graph.FieldNode;
-import refactoring.crawler.graph.MethodNode;
-import refactoring.crawler.graph.NamedDirectedMultigraph;
+import refactoring.crawler.graph.*;
 
 public class SearchHelper {
   public static List<String> findFieldReferences(FieldNode node) {
@@ -16,8 +13,20 @@ public class SearchHelper {
     return node.getSuperClasses();
   }
 
-  public static List<String> findClassReferences(NamedDirectedMultigraph graph, ClassNode node) {
-    return node.getClassesImported();
+  public static List<String> findClassReferences(
+      NamedDirectedMultigraph graph, ClassNode classNode) {
+    //    return node.getClassesImported();
+    List<String> res = new LinkedList<>();
+    for (Node n : graph.vertexSet()) {
+      if (n.getType() == Node.Type.CLASS) {
+        for (String imported : ((ClassNode) n).getClassesImported()) {
+          if (imported.equals(classNode.getFullyQualifiedName())) {
+            res.add(n.getFullyQualifiedName());
+          }
+        }
+      }
+    }
+    return res;
   }
 
   public static List<String> findMethodCallers(
