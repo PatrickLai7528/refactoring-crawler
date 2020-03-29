@@ -50,7 +50,7 @@ public abstract class RefactoringDetection {
    */
   public List<Node[]> detectRefactorings(List<Node[]> candidates) {
 
-    List<Node[]> refactoredNodes = new ArrayList<Node[]>();
+    List<Node[]> refactoredNodes = new ArrayList<>();
     List<Node[]> listWithFP = doDetectRefactorings(candidates, refactoredNodes);
     return pruneFalsePositives(listWithFP);
   }
@@ -76,12 +76,23 @@ public abstract class RefactoringDetection {
         // candidates.remove(pair); acivating this line would fail to
         // detect those cases when two
         // types of refactorings happened to the same node
+        updateFeedbackLoop(pair);
       }
     }
     if (foundNewRefactoring) {
       doDetectRefactorings(candidates, refactoredNodes);
     }
     return refactoredNodes;
+  }
+
+  /** @param pair */
+  private void updateFeedbackLoop(Node[] pair) {
+    if (isRename()) {
+      Node original = pair[0];
+      Node renamed = pair[1];
+      Dictionary<String, String> dict = getRenamingDictionary();
+      dict.put(original.getFullyQualifiedName(), renamed.getFullyQualifiedName());
+    }
   }
 
   public List<Node[]> pruneFalsePositives(List<Node[]> listWithFP) {

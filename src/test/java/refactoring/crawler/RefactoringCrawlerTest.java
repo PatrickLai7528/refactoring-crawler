@@ -5,10 +5,8 @@ package refactoring.crawler;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import java.util.LinkedList;
-import java.util.List;
+import java.io.IOException;
+import java.util.*;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import refactoring.crawler.graph.Node;
@@ -24,7 +22,7 @@ class RefactoringCrawlerTest {
 
     settings.put(RefactoringCrawler.Settings.T_CHANGE_METHOD_SIGNATURE, 1.0);
     settings.put(RefactoringCrawler.Settings.T_RENAME_METHOD, 1.0);
-    settings.put(RefactoringCrawler.Settings.T_MOVE_METHOD, 1.0);
+    settings.put(RefactoringCrawler.Settings.T_MOVE_METHOD, 0.5);
     settings.put(RefactoringCrawler.Settings.T_PUSH_DOWN_METHOD, 1.0);
     settings.put(RefactoringCrawler.Settings.T_PULL_UP_METHOD, 1.0);
     settings.put(RefactoringCrawler.Settings.T_RENAME_CLASS, 1.0);
@@ -185,7 +183,7 @@ class RefactoringCrawlerTest {
             + "package refactoring.a;\n"
             + "import refactoring.crawler.Library123;\n"
             + "public class A {\n"
-            + "private Library library = new Library();\n"
+            + "private Library library = new Library123();\n"
             + "}\n";
 
     List<String> originals = new LinkedList<>();
@@ -206,5 +204,42 @@ class RefactoringCrawlerTest {
     assertEquals("RenamedClasses", refactoringCategory.getName());
     assertEquals("CLASS= refactoring.crawler.Library", nodes[0].toString());
     assertEquals("CLASS= refactoring.crawler.Library123", nodes[1].toString());
+  }
+
+  @Test
+  void testMoveMethod() throws IOException {
+    String originalArray = TestUtils.readFile("original", "Array.java", null);
+    String originalArrayStack = TestUtils.readFile("original", "ArrayStack.java", null);
+    String originalStack = TestUtils.readFile("original", "Stack.java", null);
+
+    String newVersionArray =
+        TestUtils.readFile("testMoveMethod", "Array.java", "package refactoring.crawler.original;");
+    String newVersionArrayStack =
+        TestUtils.readFile(
+            "testMoveMethod", "ArrayStack.java", "package refactoring.crawler.original;");
+    String newVersionStack =
+        TestUtils.readFile("testMoveMethod", "Stack.java", "package refactoring.crawler.original;");
+
+    List<String> originalList = new ArrayList<>();
+    List<String> newVersionList = new ArrayList<>();
+
+    originalList.add(originalArray);
+    originalList.add(originalStack);
+    originalList.add(originalArrayStack);
+
+    newVersionList.add(newVersionArray);
+    newVersionList.add(newVersionStack);
+    newVersionList.add(newVersionArrayStack);
+
+    RefactoringCrawler refactoringCrawler = new RefactoringCrawler("testMoveMethod", settings);
+    refactoringCrawler.detect(originalList, newVersionList);
+    List<RefactoringCategory> categories = refactoringCrawler.getRefactoringCategories();
+    assertEquals(1, categories.size());
+    RefactoringCategory refactoringCategory = categories.get(0);
+    Node[] nodes = refactoringCategory.getRefactoringPairs().get(0);
+    assertEquals("MovedMethods", refactoringCategory.getName());
+    assertEquals("METHOD= refactoring.crawler.original.Array.printLast()", nodes[0].toString());
+    assertEquals(
+        "METHOD= refactoring.crawler.original.ArrayStack.printLast()", nodes[1].toString());
   }
 }
