@@ -76,7 +76,7 @@ public abstract class RefactoringDetection {
         // candidates.remove(pair); acivating this line would fail to
         // detect those cases when two
         // types of refactorings happened to the same node
-//        updateFeedbackLoop(pair);
+        //        updateFeedbackLoop(pair);
       }
     }
     if (foundNewRefactoring) {
@@ -119,7 +119,7 @@ public abstract class RefactoringDetection {
         for (Node node : verCallers) {
           if (origInV2Callers.contains(node))
             if (!nodesToRemove.contains(pair)) {
-              System.out.println("1st Prune in RD:" + pair[0] + pair[1]);
+              //              System.out.println("1st Prune in RD:" + pair[0] + pair[1]);
               nodesToRemove.add(pair);
             }
         }
