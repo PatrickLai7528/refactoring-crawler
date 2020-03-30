@@ -208,17 +208,28 @@ class RefactoringCrawlerTest {
 
   @Test
   void testMoveMethod() throws IOException {
-    String originalArray = TestUtils.readFile("original", "Array.java", null);
-    String originalArrayStack = TestUtils.readFile("original", "ArrayStack.java", null);
-    String originalStack = TestUtils.readFile("original", "Stack.java", null);
+    String originalArray = TestUtils.readFile("original", "Array.java", null, null);
+    String originalArrayStack = TestUtils.readFile("original", "ArrayStack.java", null, null);
+    String originalStack = TestUtils.readFile("original", "Stack.java", null, null);
 
     String newVersionArray =
-        TestUtils.readFile("testMoveMethod", "Array.java", "package refactoring.crawler.original;");
+        TestUtils.readFile(
+            "testMoveMethod",
+            "Array.java",
+            "package refactoring.crawler.testMoveMethod",
+            "package refactoring.crawler.original;");
     String newVersionArrayStack =
         TestUtils.readFile(
-            "testMoveMethod", "ArrayStack.java", "package refactoring.crawler.original;");
+            "testMoveMethod",
+            "ArrayStack.java",
+            "package refactoring.crawler.testMoveMethod",
+            "package refactoring.crawler.original;");
     String newVersionStack =
-        TestUtils.readFile("testMoveMethod", "Stack.java", "package refactoring.crawler.original;");
+        TestUtils.readFile(
+            "testMoveMethod",
+            "Stack.java",
+            "package refactoring.crawler.testMoveMethod",
+            "package refactoring.crawler.original;");
 
     List<String> originalList = new ArrayList<>();
     List<String> newVersionList = new ArrayList<>();
@@ -241,5 +252,49 @@ class RefactoringCrawlerTest {
     assertEquals("METHOD= refactoring.crawler.original.Array.printLast()", nodes[0].toString());
     assertEquals(
         "METHOD= refactoring.crawler.original.ArrayStack.printLast()", nodes[1].toString());
+  }
+
+  @Test
+  void testPullUpMethod() throws IOException {
+    String originalFolder = "testPullUpMethod/original";
+    String originalUnit = TestUtils.readFile(originalFolder, "Unit.java", null, null);
+    String originalTank = TestUtils.readFile(originalFolder, "Tank.java", null, null);
+    String originalSoldier = TestUtils.readFile(originalFolder, "Soldier.java", null, null);
+
+    String newVersionFolder = "testPullUpMethod/newVersion";
+    String originalPackage = "package refactoring.crawler.testPullUpMethod.original";
+    String newVersionPackage = "package refactoring.crawler.testPullUpMethod.newVersion";
+
+    String newVersionUnit =
+        TestUtils.readFile(newVersionFolder, "Unit.java", newVersionPackage, originalPackage);
+    String newVersionTank =
+        TestUtils.readFile(newVersionFolder, "Tank.java", newVersionPackage, originalPackage);
+    String newVersionSoldier =
+        TestUtils.readFile(newVersionFolder, "Soldier.java", newVersionPackage, originalPackage);
+
+    List<String> originalList = new ArrayList<>();
+    List<String> newVersionList = new ArrayList<>();
+
+    originalList.add(originalUnit);
+    originalList.add(originalTank);
+    originalList.add(originalSoldier);
+
+    newVersionList.add(newVersionUnit);
+    newVersionList.add(newVersionTank);
+    newVersionList.add(newVersionSoldier);
+
+    RefactoringCrawler refactoringCrawler = new RefactoringCrawler("test push up method", settings);
+    refactoringCrawler.detect(originalList, newVersionList);
+    List<RefactoringCategory> categories = refactoringCrawler.getRefactoringCategories();
+    assertEquals(1, categories.size());
+    RefactoringCategory refactoringCategory = categories.get(0);
+    Node[] nodes = refactoringCategory.getRefactoringPairs().get(0);
+    assertEquals("PulledUpMethods", refactoringCategory.getName());
+    assertEquals(
+        "METHOD= refactoring.crawler.testPullUpMethod.original.Tank.getHealth()",
+        nodes[0].toString());
+    assertEquals(
+        "METHOD= refactoring.crawler.testPullUpMethod.original.Unit.getHealth()",
+        nodes[1].toString());
   }
 }

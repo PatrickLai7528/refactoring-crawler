@@ -10,7 +10,8 @@ import java.io.*;
  * @create: 2020-03-29 13:55
  */
 public class TestUtils {
-  public static String readFile(String folder, String filename, String packageName)
+  public static String readFile(
+      String folder, String filename, String replacePackage, String packageName)
       throws IOException {
     String filePath = String.format("src/test/java/refactoring/crawler/%s/%s", folder, filename);
     BufferedReader bufferedReader = new BufferedReader(new FileReader(new File(filePath)));
@@ -22,10 +23,7 @@ public class TestUtils {
     }
     String fileContent = sb.toString();
     if (packageName != null) {
-      fileContent =
-          fileContent.replace(
-              "package refactoring.crawler.testMoveMethod;",
-              "package refactoring.crawler.original;");
+      fileContent = fileContent.replace(replacePackage, packageName);
     }
     return fileContent;
   }
