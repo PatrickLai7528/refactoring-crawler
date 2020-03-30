@@ -20,12 +20,12 @@ class RefactoringCrawlerTest {
   static void setUp() {
     settings = new Hashtable<>();
 
-    settings.put(RefactoringCrawler.Settings.T_CHANGE_METHOD_SIGNATURE, 1.0);
-    settings.put(RefactoringCrawler.Settings.T_RENAME_METHOD, 1.0);
+    settings.put(RefactoringCrawler.Settings.T_CHANGE_METHOD_SIGNATURE, 0.5);
+    settings.put(RefactoringCrawler.Settings.T_RENAME_METHOD, 0.5);
     settings.put(RefactoringCrawler.Settings.T_MOVE_METHOD, 0.5);
-    settings.put(RefactoringCrawler.Settings.T_PUSH_DOWN_METHOD, 1.0);
-    settings.put(RefactoringCrawler.Settings.T_PULL_UP_METHOD, 1.0);
-    settings.put(RefactoringCrawler.Settings.T_RENAME_CLASS, 1.0);
+    settings.put(RefactoringCrawler.Settings.T_PUSH_DOWN_METHOD, 0.6);
+    settings.put(RefactoringCrawler.Settings.T_PULL_UP_METHOD, 0.6);
+    settings.put(RefactoringCrawler.Settings.T_RENAME_CLASS, 0.7);
   }
 
   @Test
@@ -295,6 +295,51 @@ class RefactoringCrawlerTest {
         nodes[0].toString());
     assertEquals(
         "METHOD= refactoring.crawler.testPullUpMethod.original.Unit.getHealth()",
+        nodes[1].toString());
+  }
+
+  @Test
+  void testPushDownMethod() throws IOException {
+    String originalFolder = "testPushDownMethod/original";
+    String originalUnit = TestUtils.readFile(originalFolder, "Unit.java", null, null);
+    String originalTank = TestUtils.readFile(originalFolder, "Tank.java", null, null);
+    String originalSoldier = TestUtils.readFile(originalFolder, "Soldier.java", null, null);
+
+    String newVersionFolder = "testPushDownMethod/newVersion";
+    String originalPackage = "package refactoring.crawler.testPushDownMethod.original";
+    String newVersionPackage = "package refactoring.crawler.testPushDownMethod.newVersion";
+
+    String newVersionUnit =
+        TestUtils.readFile(newVersionFolder, "Unit.java", newVersionPackage, originalPackage);
+    String newVersionTank =
+        TestUtils.readFile(newVersionFolder, "Tank.java", newVersionPackage, originalPackage);
+    String newVersionSoldier =
+        TestUtils.readFile(newVersionFolder, "Soldier.java", newVersionPackage, originalPackage);
+
+    List<String> originalList = new ArrayList<>();
+    List<String> newVersionList = new ArrayList<>();
+
+    originalList.add(originalUnit);
+    originalList.add(originalTank);
+    originalList.add(originalSoldier);
+
+    newVersionList.add(newVersionUnit);
+    newVersionList.add(newVersionTank);
+    newVersionList.add(newVersionSoldier);
+
+    RefactoringCrawler refactoringCrawler =
+        new RefactoringCrawler("test pull down method", settings);
+    refactoringCrawler.detect(originalList, newVersionList);
+    List<RefactoringCategory> categories = refactoringCrawler.getRefactoringCategories();
+    assertEquals(1, categories.size());
+    RefactoringCategory refactoringCategory = categories.get(0);
+    Node[] nodes = refactoringCategory.getRefactoringPairs().get(0);
+    assertEquals("PushedDownMethods", refactoringCategory.getName());
+    assertEquals(
+        "METHOD= refactoring.crawler.testPushDownMethod.original.Unit.getHealth()",
+        nodes[0].toString());
+    assertEquals(
+        "METHOD= refactoring.crawler.testPushDownMethod.original.Tank.getHealth()",
         nodes[1].toString());
   }
 }
