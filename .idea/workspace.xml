@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="24fd105e-2973-4f35-bddc-4762d669e749" name="Default Changelist" comment="" />
+    <list default="true" id="24fd105e-2973-4f35-bddc-4762d669e749" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -15,6 +17,9 @@
   <component name="ExternalProjectsManager">
     <system id="GRADLE">
       <state>
+        <task path="$PROJECT_DIR$">
+          <activation />
+        </task>
         <projects_view />
       </state>
     </system>
@@ -27,7 +32,11 @@
       </list>
     </option>
   </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
   <component name="ProjectId" id="1ZX2iP5KDQ49uV7GFoPy8hIg22p" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showExcludedFiles" value="true" />
@@ -35,26 +44,116 @@
   </component>
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/src/test/java/refactoring/crawler/testPushDownMethod" />
+    <property name="project.structure.last.edited" value="Modules" />
+    <property name="project.structure.proportion" value="0.15" />
+    <property name="project.structure.side.proportion" value="0.2" />
+    <property name="settings.editor.selected.configurable" value="preferences.lookFeel" />
     <property name="show.unlinked.gradle.project.popup" value="true" />
   </component>
-  <component name="RunManager" selected="Application.RefactoringCrawler">
-    <configuration name="RefactoringCrawler" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="refactoring.crawler.RefactoringCrawler" />
-      <module name="refactoring-crawler.main" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="refactoring.crawler.detection.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
+  <component name="RecentsManager">
+    <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
+      <recent name="refactoring.crawler.detection.fieldDetection" />
+      <recent name="refactoring.crawler.detection.packageDetection" />
+      <recent name="refactoring.crawler.detection.classDetection" />
+      <recent name="refactoring.crawler.detection.method" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/test/java/refactoring/crawler/testPushDownMethod" />
+      <recent name="$PROJECT_DIR$/src/test/java/refactoring/crawler/testPushUpMethod/newVersion" />
+      <recent name="$PROJECT_DIR$/src/test/java/refactoring/crawler/testMoveMethod" />
+      <recent name="$PROJECT_DIR$/src/test/java/refactoring/crawler/original" />
+      <recent name="$PROJECT_DIR$/src/test/resources" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/test/java/refactoring/crawler" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Gradle.RefactoringCrawlerTest">
+    <configuration name="RefactoringCrawlerTest" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" value="--tests &quot;refactoring.crawler.RefactoringCrawlerTest&quot;" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value=":cleanTest" />
+            <option value=":test" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <GradleScriptDebugEnabled>false</GradleScriptDebugEnabled>
+      <method v="2" />
     </configuration>
-    <configuration name="refactoring-crawler [dependencies]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+    <configuration name="RefactoringCrawlerTest.testPullUpMethod" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" value="--tests &quot;refactoring.crawler.RefactoringCrawlerTest.testPullUpMethod&quot;" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value=":cleanTest" />
+            <option value=":test" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <GradleScriptDebugEnabled>false</GradleScriptDebugEnabled>
+      <method v="2" />
+    </configuration>
+    <configuration name="RefactoringCrawlerTest.testPushDownMethod" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" value="--tests &quot;refactoring.crawler.RefactoringCrawlerTest.testPushDownMethod&quot;" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value=":cleanTest" />
+            <option value=":test" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <GradleScriptDebugEnabled>false</GradleScriptDebugEnabled>
+      <method v="2" />
+    </configuration>
+    <configuration name="RefactoringCrawlerTest.testPushUpMethod" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" value="--tests &quot;refactoring.crawler.RefactoringCrawlerTest.testPushUpMethod&quot;" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value=":cleanTest" />
+            <option value=":test" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <GradleScriptDebugEnabled>false</GradleScriptDebugEnabled>
+      <method v="2" />
+    </configuration>
+    <configuration name="refactoring-crawler [jacocoTestCoverageVerification]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
@@ -65,7 +164,7 @@
         </option>
         <option name="taskNames">
           <list>
-            <option value="dependencies" />
+            <option value="jacocoTestCoverageVerification" />
           </list>
         </option>
         <option name="vmOptions" />
@@ -75,8 +174,11 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Application.RefactoringCrawler" />
-        <item itemvalue="Gradle.refactoring-crawler [dependencies]" />
+        <item itemvalue="Gradle.RefactoringCrawlerTest" />
+        <item itemvalue="Gradle.RefactoringCrawlerTest.testPushDownMethod" />
+        <item itemvalue="Gradle.refactoring-crawler [jacocoTestCoverageVerification]" />
+        <item itemvalue="Gradle.RefactoringCrawlerTest.testPullUpMethod" />
+        <item itemvalue="Gradle.RefactoringCrawlerTest.testPushUpMethod" />
       </list>
     </recent_temporary>
   </component>
@@ -91,53 +193,142 @@
       <option name="presentableId" value="Default" />
       <updated>1584971244282</updated>
       <workItem from="1584971249949" duration="21487000" />
-      <workItem from="1585056855574" duration="4355000" />
+      <workItem from="1585056855574" duration="43450000" />
+      <workItem from="1585222066376" duration="2203000" />
+      <workItem from="1585406787797" duration="8838000" />
+      <workItem from="1585469187793" duration="6000" />
+      <workItem from="1585469323275" duration="16169000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
   </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="COLUMN_ORDER" />
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
   <component name="WindowStateProjectService">
-    <state x="320" y="115" key="#Auto_Import" timestamp="1585018149423">
+    <state x="320" y="115" key="#Auto_Import" timestamp="1585125946517">
       <screen x="0" y="0" width="1440" height="900" />
     </state>
-    <state x="320" y="115" key="#Auto_Import/0.0.1440.900@0.0.1440.900" timestamp="1585018149423" />
-    <state x="533" y="173" key="#com.intellij.ide.util.MemberChooser" timestamp="1585064908569">
+    <state x="320" y="115" key="#Auto_Import/0.0.1440.900@0.0.1440.900" timestamp="1585125946517" />
+    <state x="320" y="115" key="#Project_Structure" timestamp="1585107271301">
       <screen x="0" y="0" width="1440" height="900" />
     </state>
-    <state x="533" y="173" key="#com.intellij.ide.util.MemberChooser/0.0.1440.900@0.0.1440.900" timestamp="1585064908569" />
+    <state x="320" y="115" key="#Project_Structure/0.0.1440.900@0.0.1440.900" timestamp="1585107271301" />
+    <state x="415" y="250" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1585407778047">
+      <screen x="0" y="0" width="1440" height="900" />
+    </state>
+    <state x="415" y="250" key="#com.intellij.fileTypes.FileTypeChooser/0.0.1440.900@0.0.1440.900" timestamp="1585407778047" />
+    <state x="533" y="173" key="#com.intellij.ide.util.MemberChooser" timestamp="1585203114545">
+      <screen x="0" y="0" width="1440" height="900" />
+    </state>
+    <state x="533" y="173" key="#com.intellij.ide.util.MemberChooser/0.0.1440.900@0.0.1440.900" timestamp="1585203114545" />
     <state x="563" y="357" key="#com.intellij.ide.util.projectWizard.JdkChooserPanel.MyDialog" timestamp="1584971325953">
       <screen x="0" y="0" width="1440" height="900" />
     </state>
     <state x="563" y="357" key="#com.intellij.ide.util.projectWizard.JdkChooserPanel.MyDialog/0.0.1440.900@0.0.1440.900" timestamp="1584971325953" />
+    <state x="404" y="299" width="632" height="344" key="#com.intellij.refactoring.move.moveClassesOrPackages.MoveClassesOrPackagesDialog.classes" timestamp="1585203147529">
+      <screen x="0" y="0" width="1440" height="900" />
+    </state>
+    <state x="404" y="299" width="632" height="344" key="#com.intellij.refactoring.move.moveClassesOrPackages.MoveClassesOrPackagesDialog.classes/0.0.1440.900@0.0.1440.900" timestamp="1585203147529" />
     <state x="277" y="0" key="#com.intellij.refactoring.rename.AutomaticRenamingDialog" timestamp="1585016078944">
       <screen x="0" y="0" width="1440" height="900" />
     </state>
     <state x="277" y="0" key="#com.intellij.refactoring.rename.AutomaticRenamingDialog/0.0.1440.900@0.0.1440.900" timestamp="1585016078944" />
-    <state width="1398" height="240" key="GridCell.Tab.0.bottom" timestamp="1585056369795">
+    <state x="458" y="204" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog" timestamp="1585109220980">
       <screen x="0" y="0" width="1440" height="900" />
     </state>
-    <state width="1398" height="240" key="GridCell.Tab.0.bottom/0.0.1440.900@0.0.1440.900" timestamp="1585056369795" />
-    <state width="1398" height="240" key="GridCell.Tab.0.center" timestamp="1585056369794">
+    <state x="458" y="204" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.0.1440.900@0.0.1440.900" timestamp="1585109220980" />
+    <state width="1398" height="338" key="GridCell.Tab.0.bottom" timestamp="1585620196087">
       <screen x="0" y="0" width="1440" height="900" />
     </state>
-    <state width="1398" height="240" key="GridCell.Tab.0.center/0.0.1440.900@0.0.1440.900" timestamp="1585056369794" />
-    <state width="1398" height="240" key="GridCell.Tab.0.left" timestamp="1585056369793">
+    <state width="1398" height="338" key="GridCell.Tab.0.bottom/0.0.1440.900@0.0.1440.900" timestamp="1585620196087" />
+    <state width="1398" height="319" key="GridCell.Tab.0.bottom/35.23.1405.877@35.23.1405.877" timestamp="1585409264650" />
+    <state width="1398" height="338" key="GridCell.Tab.0.center" timestamp="1585620196086">
       <screen x="0" y="0" width="1440" height="900" />
     </state>
-    <state width="1398" height="240" key="GridCell.Tab.0.left/0.0.1440.900@0.0.1440.900" timestamp="1585056369793" />
-    <state width="1398" height="240" key="GridCell.Tab.0.right" timestamp="1585056369794">
+    <state width="1398" height="338" key="GridCell.Tab.0.center/0.0.1440.900@0.0.1440.900" timestamp="1585620196086" />
+    <state width="1398" height="319" key="GridCell.Tab.0.center/35.23.1405.877@35.23.1405.877" timestamp="1585409264649" />
+    <state width="1398" height="338" key="GridCell.Tab.0.left" timestamp="1585620196085">
       <screen x="0" y="0" width="1440" height="900" />
     </state>
-    <state width="1398" height="240" key="GridCell.Tab.0.right/0.0.1440.900@0.0.1440.900" timestamp="1585056369794" />
+    <state width="1398" height="338" key="GridCell.Tab.0.left/0.0.1440.900@0.0.1440.900" timestamp="1585620196085" />
+    <state width="1398" height="319" key="GridCell.Tab.0.left/35.23.1405.877@35.23.1405.877" timestamp="1585409264649" />
+    <state width="1398" height="338" key="GridCell.Tab.0.right" timestamp="1585620196086">
+      <screen x="0" y="0" width="1440" height="900" />
+    </state>
+    <state width="1398" height="338" key="GridCell.Tab.0.right/0.0.1440.900@0.0.1440.900" timestamp="1585620196086" />
+    <state width="1398" height="319" key="GridCell.Tab.0.right/35.23.1405.877@35.23.1405.877" timestamp="1585409264746" />
+    <state width="1398" height="338" key="GridCell.Tab.1.bottom" timestamp="1585620196088">
+      <screen x="0" y="0" width="1440" height="900" />
+    </state>
+    <state width="1398" height="338" key="GridCell.Tab.1.bottom/0.0.1440.900@0.0.1440.900" timestamp="1585620196088" />
+    <state width="1398" height="310" key="GridCell.Tab.1.bottom/35.23.1405.877@35.23.1405.877" timestamp="1585494767803" />
+    <state width="1398" height="338" key="GridCell.Tab.1.center" timestamp="1585620196087">
+      <screen x="0" y="0" width="1440" height="900" />
+    </state>
+    <state width="1398" height="338" key="GridCell.Tab.1.center/0.0.1440.900@0.0.1440.900" timestamp="1585620196087" />
+    <state width="1398" height="310" key="GridCell.Tab.1.center/35.23.1405.877@35.23.1405.877" timestamp="1585494767802" />
+    <state width="1398" height="338" key="GridCell.Tab.1.left" timestamp="1585620196087">
+      <screen x="0" y="0" width="1440" height="900" />
+    </state>
+    <state width="1398" height="338" key="GridCell.Tab.1.left/0.0.1440.900@0.0.1440.900" timestamp="1585620196087" />
+    <state width="1398" height="310" key="GridCell.Tab.1.left/35.23.1405.877@35.23.1405.877" timestamp="1585494767801" />
+    <state width="1398" height="338" key="GridCell.Tab.1.right" timestamp="1585620196088">
+      <screen x="0" y="0" width="1440" height="900" />
+    </state>
+    <state width="1398" height="338" key="GridCell.Tab.1.right/0.0.1440.900@0.0.1440.900" timestamp="1585620196088" />
+    <state width="1398" height="310" key="GridCell.Tab.1.right/35.23.1405.877@35.23.1405.877" timestamp="1585494767802" />
+    <state x="238" y="53" key="SettingsEditor" timestamp="1585222100880">
+      <screen x="35" y="23" width="1405" height="877" />
+    </state>
+    <state x="208" y="31" key="SettingsEditor/0.0.1440.900@0.0.1440.900" timestamp="1585134146441" />
+    <state x="238" y="53" key="SettingsEditor/35.23.1405.877@35.23.1405.877" timestamp="1585222100880" />
     <state width="500" height="445" key="SwitcherDM" timestamp="1585027804908">
       <screen x="0" y="0" width="1440" height="900" />
     </state>
     <state width="500" height="445" key="SwitcherDM/0.0.1440.900@0.0.1440.900" timestamp="1585027804908" />
-    <state x="385" y="196" width="670" height="676" key="search.everywhere.popup" timestamp="1585064476794">
+    <state x="502" y="369" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1585134140106">
       <screen x="0" y="0" width="1440" height="900" />
     </state>
-    <state x="385" y="196" width="670" height="676" key="search.everywhere.popup/0.0.1440.900@0.0.1440.900" timestamp="1585064476794" />
+    <state x="502" y="369" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.0.1440.900@0.0.1440.900" timestamp="1585134140106" />
+    <state x="368" y="61" width="703" height="777" key="find.popup" timestamp="1585556547964">
+      <screen x="0" y="0" width="1440" height="900" />
+    </state>
+    <state x="368" y="61" width="703" height="777" key="find.popup/0.0.1440.900@0.0.1440.900" timestamp="1585556547964" />
+    <state x="428" y="69" key="refactoring.ChangeSignatureDialog" timestamp="1585146238696">
+      <screen x="0" y="0" width="1440" height="900" />
+    </state>
+    <state x="428" y="69" key="refactoring.ChangeSignatureDialog/0.0.1440.900@0.0.1440.900" timestamp="1585146238696" />
+    <state x="385" y="210" key="run.anything.popup" timestamp="1585134150365">
+      <screen x="0" y="0" width="1440" height="900" />
+    </state>
+    <state x="385" y="210" key="run.anything.popup/0.0.1440.900@0.0.1440.900" timestamp="1585134150365" />
+    <state x="385" y="196" width="670" height="676" key="search.everywhere.popup" timestamp="1585551460298">
+      <screen x="0" y="0" width="1440" height="900" />
+    </state>
+    <state x="385" y="196" width="670" height="676" key="search.everywhere.popup/0.0.1440.900@0.0.1440.900" timestamp="1585551460298" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/refactoring/crawler/RefactoringCrawler.java</url>
+          <line>224</line>
+          <option name="timeStamp" value="21" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>
